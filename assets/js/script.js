@@ -60,7 +60,7 @@ const satteliteCategories = {
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
 //getSattelitesNearMe(38.846226, -77.306374, 0, 45, 30);
-getUserCoordinatesFromCityName('Fairfax');
+getUserCoordinatesFromCityName('Richmond');
 
 
 /**
@@ -89,6 +89,58 @@ function getSattelitesNearMe(lat, lng, alt, searchRadius, categoryID) {
         })
 }
 
+
+
+let map;
+
+// Declares initMap for global access
+function initMap(userLat, userLon) {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
+        zoom: 8,
+        streetViewControl: false,
+        mapTypeId: google.maps.MapTypeId.SATELLITE
+    });
+
+    let marker = new google.maps.Marker({
+        position: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
+        map: map
+    })
+
+    const geocoder = new google.maps.Geocoder();
+    document.getElementById("submit").addEventListener("click", (event) => {
+        event.preventDefault();
+        marker.setMap(null);
+        geocodeAddress(geocoder, map);
+    });
+}
+
+let markerArray = [];
+
+function geocodeAddress(geocoder, resultsMap) {
+    const address = document.getElementById("address").value;
+
+    geocoder.geocode({ address: address }, (results, status) => {
+
+      if (status === "OK") {
+        // Removes any existing markers created from geocoder
+        if (markerArray.length > 0) {
+            markerArray[0].setMap(null);
+            markerArray.shift();
+        }
+        resultsMap.setCenter(results[0].geometry.location);
+        marker = new google.maps.Marker({
+          map: resultsMap,
+          position: results[0].geometry.location,
+        });
+        markerArray.push(marker);
+        console.log(markerArray);
+      } else {
+        console.log("Geocode was not successful for the following reason: " + status);
+      }
+    });
+  }
+
 /**
  * Function will get coordinates of given city name
  * @param cityName is a String name of the city user wants to get sattelite above.
@@ -103,8 +155,11 @@ function getUserCoordinatesFromCityName(cityName) {
         .then((data) => {
             console.log(data.coord.lat);
             console.log(data.coord.lon);
+
+            initMap(data.coord.lat, data.coord.lon);
         })
         .catch(function (error) {
             console.log('Exception caught with an error: \n', error);
         })
 }
+

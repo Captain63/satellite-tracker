@@ -1,0 +1,4 @@
+/* Ensures Google Map has room to display */
+#map {
+    height: 500px;
+}
