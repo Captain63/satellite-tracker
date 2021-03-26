@@ -102,11 +102,44 @@ function initMap(userLat, userLon) {
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
 
-    const marker = new google.maps.Marker({
+    let marker = new google.maps.Marker({
         position: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
         map: map
     })
+
+    const geocoder = new google.maps.Geocoder();
+    document.getElementById("submit").addEventListener("click", (event) => {
+        event.preventDefault();
+        marker.setMap(null);
+        geocodeAddress(geocoder, map);
+    });
 }
+
+let markerArray = [];
+
+function geocodeAddress(geocoder, resultsMap) {
+    const address = document.getElementById("address").value;
+
+    geocoder.geocode({ address: address }, (results, status) => {
+
+      if (status === "OK") {
+        // Removes any existing markers created from geocoder
+        if (markerArray.length > 0) {
+            markerArray[0].setMap(null);
+            markerArray.shift();
+        }
+        resultsMap.setCenter(results[0].geometry.location);
+        marker = new google.maps.Marker({
+          map: resultsMap,
+          position: results[0].geometry.location,
+        });
+        markerArray.push(marker);
+        console.log(markerArray);
+      } else {
+        console.log("Geocode was not successful for the following reason: " + status);
+      }
+    });
+  }
 
 /**
  * Function will get coordinates of given city name
