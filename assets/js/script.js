@@ -96,14 +96,14 @@ let map;
 // Declares initMap for global access
 function initMap(userLat, userLon) {
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: userLat, lng: userLon },
+        center: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
         zoom: 8,
         streetViewControl: false,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
 
     const marker = new google.maps.Marker({
-        position: { lat: userLat, lng: userLon },
+        position: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
         map: map
     })
 }
