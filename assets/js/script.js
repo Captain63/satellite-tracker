@@ -85,7 +85,7 @@ function initMap(userLat, userLon) {
     })
 
     // Test call -- can figure out if altitude parameter is needed later
-    getSattelitesNearMe(userLat, userLon, 0, 90, satteliteCategories['Military']);
+    getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military'] + "," + satteliteCategories['ISS']);
 
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
@@ -100,18 +100,6 @@ function initMap(userLat, userLon) {
         }
     }
 
-    
-    // For populating multiple sat icons once N2YO API call is fleshed out
-    // function addSatellite(satObject) {
-    //     satObject["above"].forEach(sat => {
-    //         const marker = new google.maps.Marker({
-    //             position: new google.maps.LatLng(sat.lat, sat.lng), // Figure out lat and lon properties pulled from N2YO
-    //             icon: icons.satellite.icon,
-    //             map: map
-    //         })
-    //     })
-    // }
-
     function geocodeAddress(geocoder, resultsMap) {
         const address = document.getElementById("address").value;
     
@@ -125,9 +113,8 @@ function initMap(userLat, userLon) {
                 }
                 resultsMap.setCenter(results[0].geometry.location);
                 let marker = new google.maps.Marker({
-                map: resultsMap,
-                position: results[0].geometry.location,
-                icon: icons.satellite.icon
+                    map: resultsMap,
+                    position: results[0].geometry.location,
                 });
                 markerArray.push(marker);
 
@@ -138,11 +125,39 @@ function initMap(userLat, userLon) {
                 userLon =  results[0].geometry.location.lng();
             } else {
                 throw new Error('Address not recognized');
-                // Add tool tip to inform user later
+                // Add tool tip to inform user of error later
             }
             // Test call -- can figure out if altitude parameter is needed later
-            getSattelitesNearMe(userLat, userLon, 0, 90, satteliteCategories['Military']);
+            getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military'] + "," + satteliteCategories['ISS']);
         });
+    }
+}
+
+let satMarkerArray = [];
+
+
+// For populating multiple satellite icons
+function addSatellite(satArray) {
+    // Clears any existing satellites from previous searches before populating new ones
+    clearSatellites();
+
+    satArray.forEach(sat => {
+        const satMarker = new google.maps.Marker({
+            position: new google.maps.LatLng(sat.satlat, sat.satlng), // Figure out lat and lon properties pulled from N2YO
+            icon: "./assets/images/satellite-icon-96px.png",
+            map: map
+        })
+        satMarkerArray.push(satMarker);
+    })
+}
+
+function clearSatellites() {
+     // Clears any existing satellite icons so that search is always showing latest results for area (and they don't linger on other parts of the map)
+     if (satMarkerArray.length > 0) {
+        for (let i = 0; i < satMarkerArray.length; i++) {
+            satMarkerArray[i].setMap(null);
+        }
+        satMarkerArray = [];
     }
 }
 
@@ -166,7 +181,16 @@ function initMap(userLat, userLon) {
                 throw Error(response.statusText);
             }
             //following code will be changed with actual implementation...
-            console.log(response.json());
+            response.json()
+            .then(function (data) {
+                if (data === null) {
+                    alert("No satellites found within this area!");
+                    // Clears any existing satellites from previous searches
+                    clearSatellites();
+                } else {
+                    addSatellite(data.above);
+                }
+            })
         })
         .catch(function (error) {
             console.log('Exception caught with an error: \n', error);
