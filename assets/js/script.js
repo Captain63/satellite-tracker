@@ -85,7 +85,7 @@ function initMap(userLat, userLon) {
     })
 
     // Test call -- can figure out if altitude parameter is needed later
-    getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military'] + "," + satteliteCategories['ISS']);
+    getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
 
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
@@ -128,7 +128,7 @@ function initMap(userLat, userLon) {
                 // Add tool tip to inform user of error later
             }
             // Test call -- can figure out if altitude parameter is needed later
-            getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military'] + "," + satteliteCategories['ISS']);
+            getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
         });
     }
 }
@@ -137,16 +137,37 @@ let satMarkerArray = [];
 
 
 // For populating multiple satellite icons
-function addSatellite(satArray) {
+function addSatellite(satObject) {
     // Clears any existing satellites from previous searches before populating new ones
     clearSatellites();
 
-    satArray.forEach(sat => {
+    const satCategory = satObject.info.category;
+
+    satObject.above.forEach(sat => {
         const satMarker = new google.maps.Marker({
-            position: new google.maps.LatLng(sat.satlat, sat.satlng), // Figure out lat and lon properties pulled from N2YO
+            position: new google.maps.LatLng(sat.satlat, sat.satlng),
             icon: "./assets/images/satellite-icon-96px.png",
             map: map
         })
+
+        const contentString = `
+            <h5 class="satname">Satellite: ${sat.satname}</h5>
+            <ul class="satfacts">
+                <li>Type: ${satCategory}</li>
+                <li>Launch Date: ${moment(sat.launchDate, "YYYY-MM-DD").format("MM-DD-YYYY")}</li>
+                <li>Altitude: ${(Math.round(((sat.satalt * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / ${(Math.round((((sat.satalt * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
+                <li>Latitude: ${sat.satlat}</li>
+                <li>Longitude: ${sat.satlng}</li>
+            </ul>`;
+
+        const infowindow = new google.maps.InfoWindow({
+            content: contentString
+        });
+
+        satMarker.addListener("click", () => {
+            infowindow.open(map, satMarker);
+        })
+
         satMarkerArray.push(satMarker);
     })
 }
@@ -188,7 +209,8 @@ function clearSatellites() {
                     // Clears any existing satellites from previous searches
                     clearSatellites();
                 } else {
-                    addSatellite(data.above);
+                    console.log(data);
+                    addSatellite(data);
                 }
             })
         })
