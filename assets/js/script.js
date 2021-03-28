@@ -60,38 +60,15 @@ const satteliteCategories = {
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
 //getSattelitesNearMe(38.846226, -77.306374, 0, 45, 30);
-getUserCoordinatesFromCityName('Richmond');
-
-
-/**
- * Function take parameters and finds all sattelites above the given lat/lng of an observer.
- * @var lng is longitute of the observer
- * @var lat is lattitude of the observer
- * @var alt is altitide of the observer
- * @var searchRadius is between 0 and 90 degrees above the observer to find sattelites
- * @var categoryID will come from the list of all categories (total 53, variable = satteliteCategories)
- * @todo add note regarding how to handle CORS(Cross-Origin Resource Sharing) in README.md file
- */
-function getSattelitesNearMe(lat, lng, alt, searchRadius, categoryID) {
-    let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
-    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${categoryID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
-
-    fetch(endPoint)
-        .then(function (response) {
-            if (!response.ok) {
-                throw Error(response.statusText);
-            }
-            //following code will be changed with actual implementation...
-            console.log(response.json());
-        })
-        .catch(function (error) {
-            console.log('Exception caught with an error: \n', error);
-        })
-}
-
-
 
 let map;
+
+let markerArray = [];
+
+// Default city to display: Richmond
+let userLat = 37.5538;
+let userLon = -77.4603;
+initMap(userLat, userLon);
 
 // Declares initMap for global access
 function initMap(userLat, userLon) {
@@ -107,59 +84,162 @@ function initMap(userLat, userLon) {
         map: map
     })
 
+    // Test call -- can figure out if altitude parameter is needed later
+    getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
+
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
         event.preventDefault();
         marker.setMap(null);
         geocodeAddress(geocoder, map);
     });
+
+    const icons = {
+        satellite: {
+            icon: "./assets/images/satellite-icon-96px.png"
+        }
+    }
+
+    function geocodeAddress(geocoder, resultsMap) {
+        const address = document.getElementById("address").value;
+    
+        geocoder.geocode({ address: address }, (results, status) => {
+    
+            if (status === "OK") {
+                // Removes any existing markers created from geocoder
+                if (markerArray.length > 0) {
+                    markerArray[0].setMap(null);
+                    markerArray.shift();
+                }
+                resultsMap.setCenter(results[0].geometry.location);
+                let marker = new google.maps.Marker({
+                    map: resultsMap,
+                    position: results[0].geometry.location,
+                });
+                markerArray.push(marker);
+
+                console.log(results[0]);
+
+                // Overwrite default userLat and userLon based on new user input
+                userLat = results[0].geometry.location.lat();
+                userLon =  results[0].geometry.location.lng();
+            } else {
+                throw new Error('Address not recognized');
+                // Add tool tip to inform user of error later
+            }
+            // Test call -- can figure out if altitude parameter is needed later
+            getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
+        });
+    }
 }
 
-let markerArray = [];
+let satMarkerArray = [];
 
-function geocodeAddress(geocoder, resultsMap) {
-    const address = document.getElementById("address").value;
 
-    geocoder.geocode({ address: address }, (results, status) => {
+// For populating multiple satellite icons
+function addSatellite(satObject) {
+    // Clears any existing satellites from previous searches before populating new ones
+    clearSatellites();
 
-      if (status === "OK") {
-        // Removes any existing markers created from geocoder
-        if (markerArray.length > 0) {
-            markerArray[0].setMap(null);
-            markerArray.shift();
-        }
-        resultsMap.setCenter(results[0].geometry.location);
-        marker = new google.maps.Marker({
-          map: resultsMap,
-          position: results[0].geometry.location,
+    const satCategory = satObject.info.category;
+
+    satObject.above.forEach(sat => {
+        const satMarker = new google.maps.Marker({
+            position: new google.maps.LatLng(sat.satlat, sat.satlng),
+            icon: "./assets/images/satellite-icon-96px.png",
+            map: map
+        })
+
+        const contentString = `
+            <h5 class="satname">Satellite: ${sat.satname}</h5>
+            <ul class="satfacts">
+                <li>Type: ${satCategory}</li>
+                <li>Launch Date: ${moment(sat.launchDate, "YYYY-MM-DD").format("MM-DD-YYYY")}</li>
+                <li>Altitude: ${(Math.round(((sat.satalt * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / ${(Math.round((((sat.satalt * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
+                <li>Latitude: ${sat.satlat}</li>
+                <li>Longitude: ${sat.satlng}</li>
+            </ul>`;
+
+        const infowindow = new google.maps.InfoWindow({
+            content: contentString
         });
-        markerArray.push(marker);
-        console.log(markerArray);
-      } else {
-        console.log("Geocode was not successful for the following reason: " + status);
-      }
-    });
-  }
 
+        satMarker.addListener("click", () => {
+            infowindow.open(map, satMarker);
+        })
+
+        satMarkerArray.push(satMarker);
+    })
+}
+
+function clearSatellites() {
+     // Clears any existing satellite icons so that search is always showing latest results for area (and they don't linger on other parts of the map)
+     if (satMarkerArray.length > 0) {
+        for (let i = 0; i < satMarkerArray.length; i++) {
+            satMarkerArray[i].setMap(null);
+        }
+        satMarkerArray = [];
+    }
+}
+
+// Shifted down since Google Maps API and Geocoder calls should happen first in order to generate lat and lon
 /**
- * Function will get coordinates of given city name
- * @param cityName is a String name of the city user wants to get sattelite above.
- * @todo lat and lng is printed on console for now, will be used  as a variable later.
+ * Function take parameters and finds all sattelites above the given lat/lng of an observer.
+ * @var lng is longitute of the observer
+ * @var lat is lattitude of the observer
+ * @var alt is altitide of the observer
+ * @var searchRadius is between 0 and 90 degrees above the observer to find sattelites
+ * @var categoryID will come from the list of all categories (total 53, variable = satteliteCategories)
+ * @todo add note regarding how to handle CORS(Cross-Origin Resource Sharing) in README.md file
  */
-function getUserCoordinatesFromCityName(cityName) {
-    let baseURL = 'https://api.openweathermap.org';
-    let endPoint = `${baseURL}/data/2.5/weather?q=${cityName}&appid=6eff42fd74f00dfa17ce2ae0939485b8`;
+ function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
+    let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
+    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${categoryID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
 
     fetch(endPoint)
-        .then((response) => response.json())
-        .then((data) => {
-            console.log(data.coord.lat);
-            console.log(data.coord.lon);
-
-            initMap(data.coord.lat, data.coord.lon);
+        .then(function (response) {
+            if (!response.ok) {
+                throw Error(response.statusText);
+            }
+            //following code will be changed with actual implementation...
+            response.json()
+            .then(function (data) {
+                if (data === null) {
+                    alert("No satellites found within this area!");
+                    // Clears any existing satellites from previous searches
+                    clearSatellites();
+                } else {
+                    console.log(data);
+                    addSatellite(data);
+                }
+            })
         })
         .catch(function (error) {
             console.log('Exception caught with an error: \n', error);
         })
 }
+
+
+// Commented out since Geocoder should remove need for OpenWeather
+// /**
+//  * Function will get coordinates of given city name
+//  * @param cityName is a String name of the city user wants to get sattelite above.
+//  * @todo lat and lng is printed on console for now, will be used  as a variable later.
+//  */
+// function getUserCoordinatesFromCityName(cityName) {
+//     let baseURL = 'https://api.openweathermap.org';
+//     let endPoint = `${baseURL}/data/2.5/weather?q=${cityName}&appid=6eff42fd74f00dfa17ce2ae0939485b8`;
+
+//     fetch(endPoint)
+//         .then((response) => response.json())
+//         .then((data) => {
+//             console.log(data.coord.lat);
+//             console.log(data.coord.lon);
+
+//             initMap(data.coord.lat, data.coord.lon);
+//         })
+//         .catch(function (error) {
+//             console.log('Exception caught with an error: \n', error);
+//         })
+// }
 
