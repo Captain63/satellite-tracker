@@ -85,7 +85,7 @@ function initMap(userLat, userLon) {
     })
     
     // Test call -- can figure out if altitude parameter is needed later
-    getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
+    getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military']);
 
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
@@ -101,7 +101,8 @@ function initMap(userLat, userLon) {
     }
 
     function geocodeAddress(geocoder, resultsMap) {
-        const address = document.getElementById("address").value;
+        const addressInput = document.querySelector("#address");
+        const address = document.querySelector("#address").value;
     
         geocoder.geocode({ address: address }, (results, status) => {
             
@@ -128,12 +129,18 @@ function initMap(userLat, userLon) {
                 // Overwrite default userLat and userLon based on new user input
                 userLat = results[0].geometry.location.lat();
                 userLon =  results[0].geometry.location.lng();
+                addressInput.value = "";
+
+                // Users placeholder attribute so user doesn't have to erase text from input field to search again
+                addressInput.placeholder = results[0].formatted_address;
+
+                getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military']);
             } else {
-                throw new Error('Address not recognized');
-                // Add tool tip to inform user of error later
+                addressInput.value = "";
+
+                // Users placeholder attribute so user doesn't have to erase text from input field to search again
+                addressInput.placeholder = 'Address not recognized';
             }
-            // Test call -- can figure out if altitude parameter is needed later
-            getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
         });
     }
 }
@@ -166,15 +173,18 @@ function addSatellite(satObject) {
                 <li>Longitude: ${sat.satlng}</li>
             </ul>`;
 
+        // Creates new infowindow for each satellite
         const infowindow = new google.maps.InfoWindow({
             content: contentString
         });
 
+        // Adds listener to open when satellite icon is clicked
         satMarker.addListener("click", () => {
             infowindow.open(map, satMarker);
             infowindow.setAttribute("open");
         })
 
+        // Pushes satMarker variables to array for later removal on next search
         satMarkerArray.push(satMarker);
     })
 }
@@ -193,11 +203,7 @@ function clearSatellites() {
 let circleArray = [];
 
 function addCircle(userLat, userLon, searchRadius) {
-    // Removes existing circle (if any) from map before generating new circle
-    if (circleArray.length > 0) {
-        circleArray[0].setMap(null);
-        circleArray.splice(0, 1);
-    }
+    clearCircle();
 
     // Sets new circle equal to user provided location
     searchCircle = new google.maps.Circle({
@@ -214,6 +220,14 @@ function addCircle(userLat, userLon, searchRadius) {
 
     // Pushes into circleArray to then be removed on next call
     circleArray.push(searchCircle);
+}
+
+function clearCircle() {
+    // Removes existing circle (if any) from map before generating new circle
+    if (circleArray.length > 0) {
+        circleArray[0].setMap(null);
+        circleArray.shift();
+    }
 }
 
 // Shifted down since Google Maps API and Geocoder calls should happen first in order to generate lat and lon
@@ -242,6 +256,7 @@ function addCircle(userLat, userLon, searchRadius) {
                     alert("No satellites found within this area!");
                     // Clears any existing satellites from previous searches
                     clearSatellites();
+                    clearCircle();
                 } else {
                     console.log(data);
                     addSatellite(data);
