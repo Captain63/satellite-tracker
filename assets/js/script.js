@@ -180,8 +180,15 @@ function addSatellite(satObject) {
 
         // Adds listener to open when satellite icon is clicked
         satMarker.addListener("click", () => {
-            infowindow.open(map, satMarker);
-            infowindow.setAttribute("open");
+                infowindow.open(map, satMarker);
+            // .open must first be called for .anchor property to populate -- allows user to reclick sat icon to close window
+            satMarker.addListener("click", () => {
+                if (infowindow.anchor === null) {
+                    infowindow.open(map, satMarker);
+                } else if (infowindow.anchor.visible) {
+                    infowindow.close();
+                }   
+            })                
         })
 
         // Pushes satMarker variables to array for later removal on next search
