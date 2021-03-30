@@ -1,4 +1,8 @@
 
+const satteliteList = $('#satteliteList');
+const radiusList = $('#selectRadius');
+const inputField = $('#address');
+const inputDataList = $('#inputsDataList');
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -57,12 +61,15 @@ const satteliteCategories = {
     'Yaogan': 36
 }
 
+displayInputOptions();
+displaySatteliteList();
+displayRadius();
+
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
 //getSattelitesNearMe(38.846226, -77.306374, 0, 45, 30);
 
 let map;
-
 let markerArray = [];
 
 // Default city to display: Richmond
@@ -89,6 +96,9 @@ function initMap(userLat, userLon) {
 
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
+        //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
+        localStorage.setItem(`cityName-${inputField.val()}`, inputField.val());
+        displayInputOptions();
         event.preventDefault();
         marker.setMap(null);
         geocodeAddress(geocoder, map);
@@ -124,7 +134,7 @@ function initMap(userLat, userLon) {
                 // Adds marker to markerArray for later removal
                 markerArray.push(marker);
 
-                console.log(results[0]);
+                //console.log(results[0]);
 
                 // Overwrite default userLat and userLon based on new user input
                 userLat = results[0].geometry.location.lat();
@@ -134,7 +144,7 @@ function initMap(userLat, userLon) {
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = results[0].formatted_address;
 
-                getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military']);
+                getSattelitesNearMe(userLat, userLon, 0, radiusList.val(), satteliteList.val());
             } else {
                 addressInput.value = "";
 
@@ -146,7 +156,6 @@ function initMap(userLat, userLon) {
 }
 
 let satMarkerArray = [];
-
 
 // For populating multiple satellite icons
 function addSatellite(satObject) {
@@ -260,12 +269,12 @@ function clearCircle() {
             response.json()
             .then(function (data) {
                 if (data === null) {
-                    alert("No satellites found within this area!");
+                    //alert("No satellites found within this area!");
                     // Clears any existing satellites from previous searches
                     clearSatellites();
                     clearCircle();
                 } else {
-                    console.log(data);
+                    //console.log(data);
                     addSatellite(data);
                     addCircle(lat, lng, searchRadius);
                 }
@@ -274,4 +283,45 @@ function clearCircle() {
         .catch(function (error) {
             console.log('Exception caught with an error: \n', error);
         })
+}
+
+/**
+ * Function will use object satteliteCategories and add each key to Select element on UI.
+ */
+function displaySatteliteList(){
+    let keys = Object.keys(satteliteCategories);
+
+    keys.forEach(function(each){
+        let option = $(`<option value="${each}">${each}</option>`);
+        satteliteList.append(option);
+    })
+}
+
+/**
+ * Function will display radius options on UI for user to select.
+ */
+function displayRadius(){
+    let radius = [5, 15, 30, 45, 60, 90];
+
+    radius.forEach(function(each){
+        let displayRadius = each + String.fromCharCode(176);
+        let option = $(`<option value="${each}">${displayRadius}</option>`);
+        radiusList.append(option);
+    })
+}
+
+/**
+ * Function will retreive previously entered city names from localStorage and display as an option to select.
+ */
+function displayInputOptions(){
+    let keys = Object.keys(localStorage);
+
+    inputDataList.children().remove();
+
+    keys.forEach(function(eachKey){
+        if(eachKey.startsWith('cityName-')){
+            let option = $(`<option value=${localStorage.getItem(eachKey).substring(localStorage.getItem(eachKey).indexOf('-')+1)}>`);
+            inputDataList.append(option);
+        }
+    })
 }
