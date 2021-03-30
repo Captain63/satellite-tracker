@@ -1,6 +1,8 @@
 
 const satteliteList = $('#satteliteList');
 const radiusList = $('#selectRadius');
+const inputField = $('#address');
+const inputDataList = $('#inputsDataList');
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -59,6 +61,7 @@ const satteliteCategories = {
     'Yaogan': 36
 }
 
+displayInputOptions();
 displaySatteliteList();
 displayRadius();
 
@@ -93,6 +96,9 @@ function initMap(userLat, userLon) {
 
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
+        //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
+        localStorage.setItem(`cityName-${inputField.val()}`, inputField.val());
+        displayInputOptions();
         event.preventDefault();
         marker.setMap(null);
         geocodeAddress(geocoder, map);
@@ -301,5 +307,21 @@ function displayRadius(){
         let displayRadius = each + String.fromCharCode(176);
         let option = $(`<option value="${each}">${displayRadius}</option>`);
         radiusList.append(option);
+    })
+}
+
+/**
+ * Function will retreive previously entered city names from localStorage and display as an option to select.
+ */
+function displayInputOptions(){
+    let keys = Object.keys(localStorage);
+
+    inputDataList.children().remove();
+
+    keys.forEach(function(eachKey){
+        if(eachKey.startsWith('cityName-')){
+            let option = $(`<option value=${localStorage.getItem(eachKey).substring(localStorage.getItem(eachKey).indexOf('-')+1)}>`);
+            inputDataList.append(option);
+        }
     })
 }
