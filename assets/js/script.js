@@ -81,7 +81,8 @@ initMap(userLat, userLon);
 function initMap(userLat, userLon) {
     map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
-        zoom: 8,
+        zoom: 5,
+        // Disables Street View -- useless for a satellite tracking application
         streetViewControl: false,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
@@ -272,7 +273,7 @@ function clearCircle() {
                     //alert("No satellites found within this area!");
                     // Clears any existing satellites from previous searches
                     clearSatellites();
-                    clearCircle();
+                    addCircle(lat, lng, searchRadius);
                 } else {
                     //console.log(data);
                     addSatellite(data);
