@@ -1,5 +1,6 @@
 
-const sattelitList = $('#satteliteList');
+const satteliteList = $('#satteliteList');
+const radiusList = $('#selectRadius');
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -59,6 +60,7 @@ const satteliteCategories = {
 }
 
 displaySatteliteList();
+displayRadius();
 
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
@@ -136,7 +138,7 @@ function initMap(userLat, userLon) {
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = results[0].formatted_address;
 
-                getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military']);
+                getSattelitesNearMe(userLat, userLon, 0, radiusList.val(), satteliteList.val());
             } else {
                 addressInput.value = "";
 
@@ -285,6 +287,19 @@ function displaySatteliteList(){
 
     keys.forEach(function(each){
         let option = $(`<option value="${each}">${each}</option>`);
-        sattelitList.append(option);
+        satteliteList.append(option);
+    })
+}
+
+/**
+ * Function will display radius options on UI for user to select.
+ */
+function displayRadius(){
+    let radius = [5, 15, 30, 45, 60, 90];
+
+    radius.forEach(function(each){
+        let displayRadius = each + String.fromCharCode(176);
+        let option = $(`<option value="${each}">${displayRadius}</option>`);
+        radiusList.append(option);
     })
 }
