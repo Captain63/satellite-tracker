@@ -1,4 +1,5 @@
 
+const sattelitList = $('#satteliteList');
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -57,12 +58,13 @@ const satteliteCategories = {
     'Yaogan': 36
 }
 
+displaySatteliteList();
+
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
 //getSattelitesNearMe(38.846226, -77.306374, 0, 45, 30);
 
 let map;
-
 let markerArray = [];
 
 // Default city to display: Richmond
@@ -124,7 +126,7 @@ function initMap(userLat, userLon) {
                 // Adds marker to markerArray for later removal
                 markerArray.push(marker);
 
-                console.log(results[0]);
+                //console.log(results[0]);
 
                 // Overwrite default userLat and userLon based on new user input
                 userLat = results[0].geometry.location.lat();
@@ -146,7 +148,6 @@ function initMap(userLat, userLon) {
 }
 
 let satMarkerArray = [];
-
 
 // For populating multiple satellite icons
 function addSatellite(satObject) {
@@ -260,12 +261,12 @@ function clearCircle() {
             response.json()
             .then(function (data) {
                 if (data === null) {
-                    alert("No satellites found within this area!");
+                    //alert("No satellites found within this area!");
                     // Clears any existing satellites from previous searches
                     clearSatellites();
                     clearCircle();
                 } else {
-                    console.log(data);
+                    //console.log(data);
                     addSatellite(data);
                     addCircle(lat, lng, searchRadius);
                 }
@@ -274,4 +275,16 @@ function clearCircle() {
         .catch(function (error) {
             console.log('Exception caught with an error: \n', error);
         })
+}
+
+/**
+ * Function will use object satteliteCategories and add each key to Select element on UI.
+ */
+function displaySatteliteList(){
+    let keys = Object.keys(satteliteCategories);
+
+    keys.forEach(function(each){
+        let option = $(`<option value="${each}">${each}</option>`);
+        sattelitList.append(option);
+    })
 }
