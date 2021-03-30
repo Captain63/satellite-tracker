@@ -6,10 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What's Orbiting Above Me?</title>
-    
+
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" href="./assets/images/satellite-favicon.png">
-    
+
     <!-- Normalize CSS (alternate to Reset) file link -->
     <link rel="stylesheet" href="./assets/css/normalize.css">
 
@@ -21,25 +21,30 @@
 </head>
 
 <body>
-    <form>
-        <input type="text" id="address" list="inputsDataList">
-        <datalist id="inputsDataList"></datalist>
-        <select class="form-select" id="satteliteList">
-            <option selected>Select satellite type...</option>
-        </select>
-        <select class="form-select" id="selectRadius">
-            <option selected>Select radius...</option>
-        </select>
-        <button type="submit" id="submit">Submit</button>
-    </form>
-    <!-- Empty div for display Google Map window -->
-    <div id="map"></div>
+    <div class="bg-image"></div>
+    <main>
+        <header>
+            <h1>Satellite Locator</h1>
+        </header>
+        <form>
+            <input type="text" id="address" list="inputsDataList" placeholder="Input city name or zip code">
+            <datalist id="inputsDataList"></datalist>
+            <select class="form-select" id="satteliteList">
+                <option selected>Select satellite category...</option>
+            </select>
+            <select class="form-select" id="selectRadius">
+                <option selected>Select radius...</option>
+            </select>
+            <button type="submit" id="submit">Submit</button>
+        </form>
+        <!-- Empty div for display Google Map window -->
+        <div id="map"></div>
+    </main>
 
 
 
-    
     <!-- External links -->
-    
+
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
         crossorigin="anonymous"></script>
@@ -49,13 +54,13 @@
     <!-- Google Maps link -->
     <script
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwMzuKJ4JCYcKtI2nSSJzKPxvSneleYHM&libraries=&v=weekly">
-    </script>
+        </script>
 
     <!-- Moment.js link -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-    
+
     <script src="./assets/js/script.js"></script>
-    
+
 </body>
 
 </html>
