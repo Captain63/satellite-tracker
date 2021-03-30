@@ -1,3 +1,43 @@
+body {
+    width: 90%;
+    margin: auto;
+}
+
+header {
+    height: 100px;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    font-weight: 600;
+    color: white;
+}
+
+form {
+    text-align: center;
+    margin-bottom: 100px;
+}
+
+button {
+    color: white;
+}
+
+button:hover {
+    color: red;
+    font-weight: bolder;
+}
+
+/* this brings all content forward from background image */
+main {
+    position: fixed;
+    z-index: 3;
+    left: 0;
+    right: 0;
+    margin-left: 30px;
+    margin-right: 30px;
+}
+
 /* Ensures Google Map has room to display */
 #map {
     height: 500px;
@@ -6,4 +46,25 @@
 /* Removes outline from any clicked images */
 img:focus {
     outline: none;
+}
+
+
+/* Background image displaying on the whole page, blurred */
+.bg-image {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 1;
+    height: 100vh;
+    background-image: url(../images/earth.jpg);
+    background-size: 100vw 100vh;
+    background-repeat: no-repeat;
+    background-position: center;
+
+    -webkit-filter: blur(8px);
+    -moz-filter: blur(8px);
+    -o-filter: blur(8px);
+    -ms-filter: blur(8px);
+    filter: blur(8px);
 }
