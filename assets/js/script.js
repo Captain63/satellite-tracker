@@ -83,9 +83,9 @@ function initMap(userLat, userLon) {
         position: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
         map: map
     })
-
+    
     // Test call -- can figure out if altitude parameter is needed later
-    getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
+    getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military']);
 
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
@@ -101,21 +101,27 @@ function initMap(userLat, userLon) {
     }
 
     function geocodeAddress(geocoder, resultsMap) {
-        const address = document.getElementById("address").value;
+        const addressInput = document.querySelector("#address");
+        const address = document.querySelector("#address").value;
     
         geocoder.geocode({ address: address }, (results, status) => {
-    
+            
+            // Confirms status
             if (status === "OK") {
                 // Removes any existing markers created from geocoder
                 if (markerArray.length > 0) {
                     markerArray[0].setMap(null);
                     markerArray.shift();
                 }
+
+                // Adds marker based on calculated lat and lon of user provided address
                 resultsMap.setCenter(results[0].geometry.location);
                 let marker = new google.maps.Marker({
                     map: resultsMap,
                     position: results[0].geometry.location,
                 });
+
+                // Adds marker to markerArray for later removal
                 markerArray.push(marker);
 
                 console.log(results[0]);
@@ -123,12 +129,18 @@ function initMap(userLat, userLon) {
                 // Overwrite default userLat and userLon based on new user input
                 userLat = results[0].geometry.location.lat();
                 userLon =  results[0].geometry.location.lng();
+                addressInput.value = "";
+
+                // Users placeholder attribute so user doesn't have to erase text from input field to search again
+                addressInput.placeholder = results[0].formatted_address;
+
+                getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military']);
             } else {
-                throw new Error('Address not recognized');
-                // Add tool tip to inform user of error later
+                addressInput.value = "";
+
+                // Users placeholder attribute so user doesn't have to erase text from input field to search again
+                addressInput.placeholder = 'Address not recognized';
             }
-            // Test call -- can figure out if altitude parameter is needed later
-            getSattelitesNearMe(userLat, userLon, 0, 20, satteliteCategories['Military']);
         });
     }
 }
@@ -150,6 +162,7 @@ function addSatellite(satObject) {
             map: map
         })
 
+        // Sets data to display in infowindow for each satellite
         const contentString = `
             <h5 class="satname">Satellite: ${sat.satname}</h5>
             <ul class="satfacts">
@@ -160,14 +173,25 @@ function addSatellite(satObject) {
                 <li>Longitude: ${sat.satlng}</li>
             </ul>`;
 
+        // Creates new infowindow for each satellite
         const infowindow = new google.maps.InfoWindow({
             content: contentString
         });
 
+        // Adds listener to open when satellite icon is clicked
         satMarker.addListener("click", () => {
-            infowindow.open(map, satMarker);
+                infowindow.open(map, satMarker);
+            // .open must first be called for .anchor property to populate -- allows user to reclick sat icon to close window
+            satMarker.addListener("click", () => {
+                if (infowindow.anchor === null) {
+                    infowindow.open(map, satMarker);
+                } else if (infowindow.anchor.visible) {
+                    infowindow.close();
+                }   
+            })                
         })
 
+        // Pushes satMarker variables to array for later removal on next search
         satMarkerArray.push(satMarker);
     })
 }
@@ -178,7 +202,38 @@ function clearSatellites() {
         for (let i = 0; i < satMarkerArray.length; i++) {
             satMarkerArray[i].setMap(null);
         }
+        // Clears out array to be populated with new satellites
         satMarkerArray = [];
+    }
+}
+
+let circleArray = [];
+
+function addCircle(userLat, userLon, searchRadius) {
+    clearCircle();
+
+    // Sets new circle equal to user provided location
+    searchCircle = new google.maps.Circle({
+        strokeColor: "#FF0000",
+        strokeOpacity: 0.5,
+        strokeWeight: 2,
+        fillColor: "#FF0000",
+        fillOpacity: 0.35,
+        map,
+        center: { lat: userLat, lng: userLon },
+        // 1 zenith degree roughly equals 100,000 meter search radius
+        radius: searchRadius * 100000,
+    })
+
+    // Pushes into circleArray to then be removed on next call
+    circleArray.push(searchCircle);
+}
+
+function clearCircle() {
+    // Removes existing circle (if any) from map before generating new circle
+    if (circleArray.length > 0) {
+        circleArray[0].setMap(null);
+        circleArray.shift();
     }
 }
 
@@ -208,9 +263,11 @@ function clearSatellites() {
                     alert("No satellites found within this area!");
                     // Clears any existing satellites from previous searches
                     clearSatellites();
+                    clearCircle();
                 } else {
                     console.log(data);
                     addSatellite(data);
+                    addCircle(lat, lng, searchRadius);
                 }
             })
         })
@@ -218,28 +275,3 @@ function clearSatellites() {
             console.log('Exception caught with an error: \n', error);
         })
 }
-
-
-// Commented out since Geocoder should remove need for OpenWeather
-// /**
-//  * Function will get coordinates of given city name
-//  * @param cityName is a String name of the city user wants to get sattelite above.
-//  * @todo lat and lng is printed on console for now, will be used  as a variable later.
-//  */
-// function getUserCoordinatesFromCityName(cityName) {
-//     let baseURL = 'https://api.openweathermap.org';
-//     let endPoint = `${baseURL}/data/2.5/weather?q=${cityName}&appid=6eff42fd74f00dfa17ce2ae0939485b8`;
-
-//     fetch(endPoint)
-//         .then((response) => response.json())
-//         .then((data) => {
-//             console.log(data.coord.lat);
-//             console.log(data.coord.lon);
-
-//             initMap(data.coord.lat, data.coord.lon);
-//         })
-//         .catch(function (error) {
-//             console.log('Exception caught with an error: \n', error);
-//         })
-// }
-

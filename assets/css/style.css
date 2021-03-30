@@ -2,3 +2,8 @@
 #map {
     height: 500px;
 }
+
+/* Removes outline from any clicked images */
+img:focus {
+    outline: none;
+}
