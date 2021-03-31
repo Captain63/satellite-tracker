@@ -303,6 +303,7 @@ function getISSPostion() {
     fetch(endPoint)
         .then(function (response) {
             if (!response.ok) {
+                displayAlertModal("Something went wrong with the server! Please try reloading the page.");
                 throw Error(response.statusText);
             }
             response.json().then(function (data){
@@ -338,6 +339,7 @@ function getISSPostion() {
     fetch(endPoint)
         .then(function (response) {
             if (!response.ok) {
+                displayAlertModal("Search terms not valid! Please double check all fields have been filled in.");
                 throw Error(response.statusText);
             }
             //following code will be changed with actual implementation...
