@@ -4,6 +4,8 @@ const radiusList = $('#selectRadius');
 const inputField = $('#address');
 const inputDataList = $('#inputsDataList');
 const alertModal = document.querySelector("#alertModal");
+const gMapWindow = document.querySelector("#map");
+const gMapBaseDiv = document.querySelector(`div[style="z-index: 3; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px; touch-action: pan-x pan-y;"]`);
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -71,7 +73,6 @@ getISSPostion();
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
 // Google Maps API calls
-
 // Global map variable for assigning different icons/locations to map
 let map;
 
@@ -80,7 +81,7 @@ let markerArray = [];
 
 // Declares initMap for global access
 function initMap(userLat, userLon) {
-    map = new google.maps.Map(document.querySelector("#map"), {
+    map = new google.maps.Map(gMapWindow, {
         center: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
         zoom: 5,
         // Disables Street View -- useless for a satellite tracking application
@@ -194,6 +195,8 @@ function initMap(userLat, userLon) {
 
 // Satellite icons functions and global variables
 let satMarkerArray = [];
+let infoWindowArray = [];
+let openInfoWindows = [];
 
 // For populating multiple satellite icons
 function addSatellite(satObject) {
@@ -235,18 +238,12 @@ function addSatellite(satObject) {
         // Adds listener to open when satellite icon is clicked
         satMarker.addListener("click", () => {
                 infowindow.open(map, satMarker);
-            // .open must first be called for .anchor property to populate -- allows user to reclick sat icon to close window
-            satMarker.addListener("click", () => {
-                if (infowindow.anchor === null) {
-                    infowindow.open(map, satMarker);
-                } else if (infowindow.anchor.visible) {
-                    infowindow.close();
-                }   
-            })                
+                openInfoWindows.push(infowindow);       
         })
 
         // Pushes satMarker variables to array for later removal on next search
         satMarkerArray.push(satMarker);
+        infoWindowArray.push(infowindow);
     })
 }
 
@@ -417,8 +414,27 @@ document.querySelector(".close").addEventListener("click", () => {
 }) 
 
 // Allows user to close modal by clicking outside
-window.onclick = function(event) {
+window.addEventListener("click", function(event) {
     if (event.target === alertModal) {
         alertModal.classList.add("hidden");
     }
-}
+})
+
+// Adds event listener so only one satellite icon displays at a time
+gMapWindow.addEventListener("click", function(event) {
+    let infoClickCount = 0;
+
+    // Checks that any infowindows are currently open before proceeding
+    if (openInfoWindows.length > 1) {
+        openInfoWindows.forEach(window => {
+            if (event.target === window) {
+                infoClickCount++;
+            }
+
+            if (infoClickCount === 0) {
+                window.close();
+                openInfoWindows.shift();
+            }
+        })
+    }
+})
