@@ -80,9 +80,9 @@ let map;
 let markerArray = [];
 
 // Declares initMap for global access
-function initMap(userLat, userLon) {
+function initMap(issLat, issLon, altitude) {
     map = new google.maps.Map(gMapWindow, {
-        center: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
+        center: { lat: parseFloat(issLat), lng: parseFloat(issLon) },
         zoom: 5,
         // Disables Street View -- useless for a satellite tracking application
         streetViewControl: false,
@@ -123,13 +123,31 @@ function initMap(userLat, userLon) {
     }
 
     // Creates marker to display on map
-    const marker = new google.maps.Marker({
-        position: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
+    const issMarker = new google.maps.Marker({
+        position: { lat: parseFloat(issLat), lng: parseFloat(issLon) },
         // Sets marker to custom ISS icon
         icon: issSVG,
         map: map
     })
-    
+
+    const contentString = `
+        <h5 class="satname">International Space Station</h5>
+        <ul class="satfacts">
+            <li>Launch Date: 11-20-1998</li>
+            <li>Altitude: ${(Math.round(((altitude * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / ${(Math.round((((altitude * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
+            <li>Latitude: ${issLat}</li>
+            <li>Longitude: ${issLon}</li>
+        </ul>`;
+
+    // Creates new infowindow
+    const infowindow = new google.maps.InfoWindow({
+        content: contentString
+    });
+
+    issMarker.addListener("click", () => {
+        infowindow.open(map, issMarker);
+    })
+
     // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
     document.querySelector("#submit").addEventListener("click", (event) => {
@@ -304,12 +322,13 @@ function getISSPostion() {
                 throw Error(response.statusText);
             }
             response.json().then(function (data){
-                // Assigns ISS lat and lon to variables
+                // Assigns ISS lat, lon and altitude to variables
                 const issLat = data.positions[0].satlatitude;
                 const issLng = data.positions[0].satlongitude;
+                const altitude = data.positions[0].sataltitude;
 
                 // Passes variables to initMap function
-                initMap(issLat, issLng);
+                initMap(issLat, issLng, altitude);
                 
                 // Creates example search radius circle with ISS at center
                 addCircle(issLat, issLng, 10);
