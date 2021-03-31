@@ -3,6 +3,7 @@ const satteliteList = $('#satteliteList');
 const radiusList = $('#selectRadius');
 const inputField = $('#address');
 const inputDataList = $('#inputsDataList');
+const alertModal = document.querySelector("#alertModal");
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -64,6 +65,7 @@ const satteliteCategories = {
 displayInputOptions();
 displaySatteliteList();
 displayRadius();
+getISSPostion();
 
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
@@ -72,28 +74,81 @@ displayRadius();
 let map;
 let markerArray = [];
 
-// Default city to display: Richmond
-let userLat = 37.5538;
-let userLon = -77.4603;
-initMap(userLat, userLon);
+// // Default city to display: Richmond
+// let userLat = 37.5538;
+// let userLon = -77.4603;
+// initMap(userLat, userLon);
+
+function getISSPostion() {
+    let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
+    let endPoint = `${baseURL}positions/25544/-28/5/0/1/&apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
+
+    fetch(endPoint)
+        .then(function (response) {
+            if (!response.ok) {
+                throw Error(response.statusText);
+            }
+            response.json().then(function (data){
+                const issLat = data.positions[0].satlatitude;
+                const issLng = data.positions[0].satlongitude;
+
+                initMap(issLat, issLng);
+                // addISS(data);
+                addCircle(issLat, issLng, 10);
+            })
+        })
+        .catch(function (error) {
+            console.log('Exception caught with an error: \n', error);
+        })
+}
 
 // Declares initMap for global access
 function initMap(userLat, userLon) {
     map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
-        zoom: 8,
+        zoom: 5,
+        // Disables Street View -- useless for a satellite tracking application
         streetViewControl: false,
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
 
-    let marker = new google.maps.Marker({
+    const issSVG = {
+        path: `M21.8,5.2C21.9,5.2,22,5.1,22,5V1.1c0-0.1-0.1-0.2-0.2-0.2H20c-0.1,0-0.2,0.1-0.2,0.2V5c0,0.1,0.1,0.2,0.2,0.2h0.7v0.5h-2
+		c-0.3-0.3-0.7-0.4-1.2-0.4c-1,0-1.8,0.7-1.9,1.7h-0.2V6.5c0-0.1-0.1-0.2-0.2-0.2h-1.6l-0.3-0.6c0-0.1-0.1-0.1-0.2-0.1h-2.2V5.2h0.9
+		c0.1,0,0.2-0.1,0.2-0.2V0.2C12,0.1,11.9,0,11.8,0H9.6C9.5,0,9.4,0.1,9.4,0.2v4.7c0,0.1,0.1,0.2,0.2,0.2h0.9v0.4H8.4
+		c-0.1,0-0.2,0.1-0.2,0.2V7H7.9C7.8,6.2,7.1,5.5,6.3,5.5c-0.6,0-1.1,0.3-1.4,0.7C4.6,5.8,4,5.5,3.5,5.5h-1V5.2h0.3
+		C2.9,5.2,3,5.1,3,5V1.1C3,1,2.9,0.9,2.8,0.9H1C0.9,0.9,0.8,1,0.8,1.1V5c0,0.1,0.1,0.2,0.2,0.2h0.3v0.3H0.2C0.1,5.5,0,5.6,0,5.7v2.9
+		c0,0.1,0.1,0.2,0.2,0.2h1.1v0.3H1c-0.1,0-0.2,0.1-0.2,0.2v3.9c0,0.1,0.1,0.2,0.2,0.2h1.8c0.1,0,0.2-0.1,0.2-0.2V9.4
+		c0-0.1-0.1-0.2-0.2-0.2H2.4V8.9h1c0.6,0,1.1-0.3,1.4-0.7c0.3,0.4,0.8,0.7,1.4,0.7c0.9,0,1.6-0.6,1.7-1.5h0.2v1.2
+		c0,0.1,0.1,0.2,0.2,0.2h2.1v0.4H9.6c-0.1,0-0.2,0.1-0.2,0.2v4.7c0,0.1,0.1,0.2,0.2,0.2h2.2c0.1,0,0.2-0.1,0.2-0.2V9.5
+		c0-0.1-0.1-0.2-0.2-0.2h-0.9V8.9h2.2c0.1,0,0.2,0,0.2-0.1l0.3-0.6h1.6c0.1,0,0.2-0.1,0.2-0.2V7.4h0.2c0.1,0.9,0.9,1.7,1.9,1.7
+		c0.4,0,0.8-0.1,1.2-0.4h2v0.5H20c-0.1,0-0.2,0.1-0.2,0.2v3.9c0,0.1,0.1,0.2,0.2,0.2h1.8c0.1,0,0.2-0.1,0.2-0.2V9.4
+		c0-0.1-0.1-0.2-0.2-0.2h-0.7V8.7h0.7c0.1,0,0.2-0.1,0.2-0.2V5.9c0-0.1-0.1-0.2-0.2-0.2h-0.7V5.2H21.8z M10.9,4.7V4h0.7v0.7H10.9z
+		 M10.5,2.4H9.8V1.6h0.7V2.4z M10.9,1.6h0.7v0.8h-0.7V1.6z M10.5,2.8v0.8H9.8V2.8H10.5z M10.9,2.8h0.7v0.8h-0.7V2.8z M11.6,1.2h-0.7
+		V0.4h0.7V1.2z M10.5,0.4v0.7H9.8V0.4H10.5z M9.8,4.7V4h0.7v0.7H9.8z M1.4,8.5V6h1.2v2.5H1.4z M3,6h0.4v2.5H3V6z M2.6,3.3v0.5H1.2
+		V3.3H2.6z M1.2,2.8V2.3h1.4v0.5H1.2z M2.6,1.3v0.5H1.2V1.3H2.6z M1.2,4.2h1.4v0.5H1.2V4.2z M1.8,5.2H2v0.3H1.8V5.2z M0.4,6h0.5v2.5
+		H0.4V6z M1.2,11.2v-0.5h1.4v0.5H1.2z M2.6,11.6v0.5H1.2v-0.5H2.6z M1.2,13.1v-0.5h1.4v0.5H1.2z M2.6,10.2H1.2V9.7h1.4
+		C2.6,9.7,2.6,10.2,2.6,10.2z M2,9.2H1.8V8.9H2V9.2z M3.8,8.4V6c0.4,0.1,0.7,0.4,0.8,0.8v0.9C4.5,8,4.2,8.3,3.8,8.4z M6.3,8.5
+		c-0.5,0-1-0.3-1.2-0.8V6.8C5.3,6.3,5.7,6,6.3,6c0.7,0,1.2,0.6,1.2,1.2C7.5,7.9,6.9,8.5,6.3,8.5z M10.5,9.7v0.7H9.8V9.7H10.5z
+		 M10.9,12h0.7v0.8h-0.7V12z M10.5,12.8H9.8V12h0.7V12.8z M10.9,11.6v-0.8h0.7v0.8H10.9z M10.5,11.6H9.8v-0.8h0.7V11.6z M9.8,13.2
+		h0.7V14H9.8V13.2z M10.9,14v-0.7h0.7V14H10.9z M11.6,9.7v0.7h-0.7V9.7H11.6z M8.6,5.9h0.6v2.5H8.6V5.9z M13,8.5H9.7V5.9H13l0.3,0.5
+		v1.5L13,8.5z M15,7.7h-1.3V6.7H15V7.7z M20.2,11.2v-0.5h1.4v0.5H20.2z M21.6,11.6v0.5h-1.4v-0.5H21.6z M20.2,13.1v-0.5h1.4v0.5
+		H20.2z M21.6,10.2h-1.4V9.7h1.4V10.2z M16.1,7.2c0-0.5,0.2-0.9,0.6-1.2v2.4C16.3,8.1,16.1,7.7,16.1,7.2z M17.5,8.7
+		c-0.1,0-0.3,0-0.4-0.1V5.8c0.1,0,0.3-0.1,0.4-0.1c0.3,0,0.7,0.1,0.9,0.3c0,0,0,0,0,0v2.2c0,0,0,0,0,0C18.2,8.5,17.9,8.7,17.5,8.7z
+		 M21.6,8.3h-2.6V6.1h2.6V8.3z M21.6,3.3v0.5h-1.4V3.3H21.6z M20.2,2.8V2.3h1.4v0.5H20.2z M21.6,1.3v0.5h-1.4V1.3H21.6z M20.2,4.2
+		h1.4v0.5h-1.4V4.2z`,
+        fillColor: "green",
+        fillOpacity: 0.6,
+        scale: 2.75,
+        anchor: new google.maps.Point(10, 7)
+    }
+
+    const marker = new google.maps.Marker({
         position: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
+        icon: issSVG,
         map: map
     })
     
-    // Test call -- can figure out if altitude parameter is needed later
-    getSattelitesNearMe(userLat, userLon, 0, 10, satteliteCategories['Military']);
-
     const geocoder = new google.maps.Geocoder();
     document.getElementById("submit").addEventListener("click", (event) => {
         //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
@@ -103,12 +158,6 @@ function initMap(userLat, userLon) {
         marker.setMap(null);
         geocodeAddress(geocoder, map);
     });
-
-    const icons = {
-        satellite: {
-            icon: "./assets/images/satellite-icon-96px.png"
-        }
-    }
 
     function geocodeAddress(geocoder, resultsMap) {
         const addressInput = document.querySelector("#address");
@@ -150,6 +199,8 @@ function initMap(userLat, userLon) {
 
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = 'Address not recognized';
+                displayAlertModal("Address not recognized. Please check search term.");
+                clearCircle();
             }
         });
     }
@@ -162,12 +213,17 @@ function addSatellite(satObject) {
     // Clears any existing satellites from previous searches before populating new ones
     clearSatellites();
 
-    const satCategory = satObject.info.category;
+    const satSVG = {
+        path: "M5.05,17.51l2.08,2.08a.41.41,0,0,0,.56,0,3.72,3.72,0,0,0,.9-3.81l.63-.63,1,1a.44.44,0,0,0,.28.12.4.4,0,0,0,.28-.12l2.56-2.55,1,1-1.25,1.25a.4.4,0,0,0,0,.56l5.16,5.16a.39.39,0,0,0,.28.12.4.4,0,0,0,.29-.12l3.06-3.06a.4.4,0,0,0,0-.57l-5.16-5.16a.4.4,0,0,0-.56,0L14.91,14l-1-1,1.92-1.93a2.2,2.2,0,0,0,.26-2.81l.9-.9a.43.43,0,0,0,.11-.28A.39.39,0,0,0,17,6.84L15.16,5a.4.4,0,0,0-.56,0l-.9.9a2.2,2.2,0,0,0-2.81.26L9,8.1l-1-1L9.21,5.84a.4.4,0,0,0,.12-.28.42.42,0,0,0-.12-.28L4.05.12A.39.39,0,0,0,3.77,0a.4.4,0,0,0-.29.12L.42,3.18a.4.4,0,0,0-.12.29.39.39,0,0,0,.12.28L5.58,8.91a.39.39,0,0,0,.56,0L7.39,7.66l1,1L5.85,11.22a.39.39,0,0,0,0,.56l1,1-.63.63a3.72,3.72,0,0,0-3.81.9.43.43,0,0,0-.11.28.39.39,0,0,0,.11.28L4.49,17l-.14.14a.4.4,0,0,0,0,.56.39.39,0,0,0,.56,0ZM3,5.18l2.5-2.5L6.65,3.84,4.14,6.35ZM4.92,2.12l-2.5,2.5L1.26,3.47,3.77,1ZM8.37,5.56,5.86,8.07,4.7,6.91,7.21,4.4Zm11,11L16.82,19l-1.17-1.16,2.51-2.51Zm-1.94,3.06,2.5-2.5L21,18.23l-2.51,2.51Zm-3.45-3.44,2.51-2.51,1.16,1.16L15.09,17.3Zm1-5.26-3.37,3.37L7.75,10.44l3.37-3.37ZM13.45,6.74l1.81,1.81a1.4,1.4,0,0,1,.42,1,1.37,1.37,0,0,1-.22.74L11.71,6.54a1.38,1.38,0,0,1,.74-.21A1.4,1.4,0,0,1,13.45,6.74Zm2.69.38-.6.59-.62-.63-.63-.62.59-.6ZM6.69,11.5l.5-.5L11,14.81l-.5.5ZM8.24,15a4,4,0,0,0-.55-.7,4,4,0,0,0-.7-.55l.42-.42,1.25,1.25Zm-5-.4a2.94,2.94,0,0,1,4.12,4.12Z",
+        fillColor: "blue",
+        fillOpacity: 0.6,
+        scale: 1.75
+    }    
 
     satObject.above.forEach(sat => {
         const satMarker = new google.maps.Marker({
             position: new google.maps.LatLng(sat.satlat, sat.satlng),
-            icon: "./assets/images/satellite-icon-96px.png",
+            icon: satSVG,
             map: map
         })
 
@@ -175,7 +231,6 @@ function addSatellite(satObject) {
         const contentString = `
             <h5 class="satname">Satellite: ${sat.satname}</h5>
             <ul class="satfacts">
-                <li>Type: ${satCategory}</li>
                 <li>Launch Date: ${moment(sat.launchDate, "YYYY-MM-DD").format("MM-DD-YYYY")}</li>
                 <li>Altitude: ${(Math.round(((sat.satalt * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / ${(Math.round((((sat.satalt * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
                 <li>Latitude: ${sat.satlat}</li>
@@ -246,6 +301,11 @@ function clearCircle() {
     }
 }
 
+function displayAlertModal(errorText) {
+    document.querySelector(".alert-text").textContent = errorText;
+    alertModal.classList.remove("hidden");
+}
+
 // Shifted down since Google Maps API and Geocoder calls should happen first in order to generate lat and lon
 /**
  * Function take parameters and finds all sattelites above the given lat/lng of an observer.
@@ -269,10 +329,11 @@ function clearCircle() {
             response.json()
             .then(function (data) {
                 if (data === null) {
-                    //alert("No satellites found within this area!");
+                    displayAlertModal("No satellites found within search radius. Please search again.");
+
                     // Clears any existing satellites from previous searches
                     clearSatellites();
-                    clearCircle();
+                    addCircle(lat, lng, searchRadius);
                 } else {
                     //console.log(data);
                     addSatellite(data);
@@ -324,4 +385,18 @@ function displayInputOptions(){
             inputDataList.append(option);
         }
     })
+}
+
+
+// Modal Functions
+// Allows user to close modal by clicking X
+document.querySelector(".close").addEventListener("click", () => {
+    alertModal.classList.add("hidden");
+}) 
+
+// Allows user to close modal by clicking outside
+window.onclick = function(event) {
+    if (event.target === alertModal) {
+        alertModal.classList.add("hidden");
+    }
 }
