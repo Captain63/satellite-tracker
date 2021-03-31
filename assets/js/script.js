@@ -3,6 +3,7 @@ const satteliteList = $('#satteliteList');
 const radiusList = $('#selectRadius');
 const inputField = $('#address');
 const inputDataList = $('#inputsDataList');
+const alertModal = document.querySelector("#alertModal");
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -151,6 +152,8 @@ function initMap(userLat, userLon) {
 
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = 'Address not recognized';
+                displayAlertModal("Address not recognized. Please check search term.");
+                clearCircle();
             }
         });
     }
@@ -247,6 +250,11 @@ function clearCircle() {
     }
 }
 
+function displayAlertModal(errorText) {
+    document.querySelector(".alert-text").textContent = errorText;
+    alertModal.classList.remove("hidden");
+}
+
 // Shifted down since Google Maps API and Geocoder calls should happen first in order to generate lat and lon
 /**
  * Function take parameters and finds all sattelites above the given lat/lng of an observer.
@@ -270,7 +278,8 @@ function clearCircle() {
             response.json()
             .then(function (data) {
                 if (data === null) {
-                    //alert("No satellites found within this area!");
+                    displayAlertModal("No satellites found within search radius. Please search again.");
+
                     // Clears any existing satellites from previous searches
                     clearSatellites();
                     addCircle(lat, lng, searchRadius);
@@ -326,3 +335,15 @@ function displayInputOptions(){
         }
     })
 }
+
+// Allows user to close modal by clicking X
+document.querySelector(".close").addEventListener("click", () => {
+    alertModal.classList.add("hidden");
+}) 
+
+// Allows user to close modal by clicking outside
+window.onclick = function(event) {
+    if (event.target === alertModal) {
+        alertModal.classList.add("hidden");
+    }
+  }
