@@ -1,9 +1,11 @@
-
+// DOM declarations
 const satteliteList = $('#satteliteList');
 const radiusList = $('#selectRadius');
 const inputField = $('#address');
 const inputDataList = $('#inputsDataList');
 const alertModal = document.querySelector("#alertModal");
+const gMapWindow = document.querySelector("#map");
+const gMapBaseDiv = document.querySelector(`div[style="z-index: 3; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px; touch-action: pan-x pan-y;"]`);
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -62,6 +64,7 @@ const satteliteCategories = {
     'Yaogan': 36
 }
 
+// Function calls to run on page load
 displayInputOptions();
 displaySatteliteList();
 displayRadius();
@@ -69,46 +72,21 @@ getISSPostion();
 
 //Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
-//getSattelitesNearMe(38.846226, -77.306374, 0, 45, 30);
-
+// Google Maps API calls
+// Global map variable for assigning different icons/locations to map
 let map;
+
+// Global variable to store marker instances once created for later removal
 let markerArray = [];
 
-// // Default city to display: Richmond
-// let userLat = 37.5538;
-// let userLon = -77.4603;
-// initMap(userLat, userLon);
-
-function getISSPostion() {
-    let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
-    let endPoint = `${baseURL}positions/25544/-28/5/0/1/&apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
-
-    fetch(endPoint)
-        .then(function (response) {
-            if (!response.ok) {
-                throw Error(response.statusText);
-            }
-            response.json().then(function (data){
-                const issLat = data.positions[0].satlatitude;
-                const issLng = data.positions[0].satlongitude;
-
-                initMap(issLat, issLng);
-                // addISS(data);
-                addCircle(issLat, issLng, 10);
-            })
-        })
-        .catch(function (error) {
-            console.log('Exception caught with an error: \n', error);
-        })
-}
-
 // Declares initMap for global access
-function initMap(userLat, userLon) {
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
+function initMap(issLat, issLon, altitude) {
+    map = new google.maps.Map(gMapWindow, {
+        center: { lat: parseFloat(issLat), lng: parseFloat(issLon) },
         zoom: 5,
         // Disables Street View -- useless for a satellite tracking application
         streetViewControl: false,
+        // Sets default map view to satellite version
         mapTypeId: google.maps.MapTypeId.SATELLITE
     });
 
@@ -140,34 +118,61 @@ function initMap(userLat, userLon) {
         fillColor: "green",
         fillOpacity: 0.6,
         scale: 2.75,
+        // Anchors icon in center of circle
         anchor: new google.maps.Point(10, 7)
     }
 
-    const marker = new google.maps.Marker({
-        position: { lat: parseFloat(userLat), lng: parseFloat(userLon) },
+    // Creates marker to display on map
+    const issMarker = new google.maps.Marker({
+        position: { lat: parseFloat(issLat), lng: parseFloat(issLon) },
+        // Sets marker to custom ISS icon
         icon: issSVG,
         map: map
     })
-    
+
+    const contentString = `
+        <h5 class="satname">International Space Station</h5>
+        <ul class="satfacts">
+            <li>Launch Date: 11-20-1998</li>
+            <li>Altitude: ${(Math.round(((altitude * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / ${(Math.round((((altitude * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
+            <li>Latitude: ${issLat}</li>
+            <li>Longitude: ${issLon}</li>
+        </ul>`;
+
+    // Creates new infowindow
+    const infowindow = new google.maps.InfoWindow({
+        content: contentString
+    });
+
+    issMarker.addListener("click", () => {
+        infowindow.open(map, issMarker);
+    })
+
+    // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
-    document.getElementById("submit").addEventListener("click", (event) => {
+    document.querySelector("#submit").addEventListener("click", (event) => {
         //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
         localStorage.setItem(`cityName-${inputField.val()}`, inputField.val());
         displayInputOptions();
         event.preventDefault();
+        // Removes ISS marker
         marker.setMap(null);
+        // Passes in Google Maps object
         geocodeAddress(geocoder, map);
     });
 
     function geocodeAddress(geocoder, resultsMap) {
+        // Input field for address
         const addressInput = document.querySelector("#address");
-        const address = document.querySelector("#address").value;
+
+        // Actual string entered into input field for address
+        const address = addressInput.value;
     
         geocoder.geocode({ address: address }, (results, status) => {
             
             // Confirms status
             if (status === "OK") {
-                // Removes any existing markers created from geocoder
+                // Removes previous marker created by geocoder
                 if (markerArray.length > 0) {
                     markerArray[0].setMap(null);
                     markerArray.shift();
@@ -206,7 +211,10 @@ function initMap(userLat, userLon) {
     }
 }
 
+// Satellite icons functions and global variables
 let satMarkerArray = [];
+let infoWindowArray = [];
+let openInfoWindows = [];
 
 // For populating multiple satellite icons
 function addSatellite(satObject) {
@@ -220,8 +228,11 @@ function addSatellite(satObject) {
         scale: 1.75
     }    
 
+    // Iterates through all satellites pulled from N2YO
     satObject.above.forEach(sat => {
+        // Creates marker for each satellite with custom icon
         const satMarker = new google.maps.Marker({
+            // Sets icon position per N2YO data
             position: new google.maps.LatLng(sat.satlat, sat.satlng),
             icon: satSVG,
             map: map
@@ -245,18 +256,12 @@ function addSatellite(satObject) {
         // Adds listener to open when satellite icon is clicked
         satMarker.addListener("click", () => {
                 infowindow.open(map, satMarker);
-            // .open must first be called for .anchor property to populate -- allows user to reclick sat icon to close window
-            satMarker.addListener("click", () => {
-                if (infowindow.anchor === null) {
-                    infowindow.open(map, satMarker);
-                } else if (infowindow.anchor.visible) {
-                    infowindow.close();
-                }   
-            })                
+                openInfoWindows.push(infowindow);       
         })
 
         // Pushes satMarker variables to array for later removal on next search
         satMarkerArray.push(satMarker);
+        infoWindowArray.push(infowindow);
     })
 }
 
@@ -271,8 +276,10 @@ function clearSatellites() {
     }
 }
 
+// Search Radius circle functions and global variables
 let circleArray = [];
 
+// Creates circles based off search radius and user provided lat and lng
 function addCircle(userLat, userLon, searchRadius) {
     clearCircle();
 
@@ -301,12 +308,37 @@ function clearCircle() {
     }
 }
 
-function displayAlertModal(errorText) {
-    document.querySelector(".alert-text").textContent = errorText;
-    alertModal.classList.remove("hidden");
+// N2YO API calls
+// Function displays position of ISS on map on page load
+function getISSPostion() {
+    let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
+    // Pulls position of ISS for next second based on page load time
+    let endPoint = `${baseURL}positions/25544/-28/5/0/1/&apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
+
+    fetch(endPoint)
+        .then(function (response) {
+            if (!response.ok) {
+                displayAlertModal("Something went wrong with the server! Please try reloading the page.");
+                throw Error(response.statusText);
+            }
+            response.json().then(function (data){
+                // Assigns ISS lat, lon and altitude to variables
+                const issLat = data.positions[0].satlatitude;
+                const issLng = data.positions[0].satlongitude;
+                const altitude = data.positions[0].sataltitude;
+
+                // Passes variables to initMap function
+                initMap(issLat, issLng, altitude);
+                
+                // Creates example search radius circle with ISS at center
+                addCircle(issLat, issLng, 10);
+            })
+        })
+        .catch(function (error) {
+            console.log('Exception caught with an error: \n', error);
+        })
 }
 
-// Shifted down since Google Maps API and Geocoder calls should happen first in order to generate lat and lon
 /**
  * Function take parameters and finds all sattelites above the given lat/lng of an observer.
  * @var lng is longitute of the observer
@@ -323,6 +355,7 @@ function displayAlertModal(errorText) {
     fetch(endPoint)
         .then(function (response) {
             if (!response.ok) {
+                displayAlertModal("Search terms not valid! Please double check all fields have been filled in.");
                 throw Error(response.statusText);
             }
             //following code will be changed with actual implementation...
@@ -388,15 +421,39 @@ function displayInputOptions(){
 }
 
 
-// Modal Functions
+// Modal Functions + Event Listeners
+function displayAlertModal(errorText) {
+    document.querySelector(".alert-text").textContent = errorText;
+    alertModal.classList.remove("hidden");
+}
+
 // Allows user to close modal by clicking X
 document.querySelector(".close").addEventListener("click", () => {
     alertModal.classList.add("hidden");
 }) 
 
 // Allows user to close modal by clicking outside
-window.onclick = function(event) {
+window.addEventListener("click", function(event) {
     if (event.target === alertModal) {
         alertModal.classList.add("hidden");
     }
-}
+})
+
+// Adds event listener so only one satellite icon displays at a time
+gMapWindow.addEventListener("click", function(event) {
+    let infoClickCount = 0;
+
+    // Checks that any infowindows are currently open before proceeding
+    if (openInfoWindows.length > 1) {
+        openInfoWindows.forEach(window => {
+            if (event.target === window) {
+                infoClickCount++;
+            }
+
+            if (infoClickCount === 0) {
+                window.close();
+                openInfoWindows.shift();
+            }
+        })
+    }
+})
