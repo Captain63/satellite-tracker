@@ -1,8 +1,9 @@
 // DOM declarations
-const satteliteList = $('#satteliteList');
-const radiusList = $('#selectRadius');
-const inputField = $('#address');
-const inputDataList = $('#inputsDataList');
+const satteliteList = document.querySelector('#satteliteList');
+const radiusList = document.querySelector('#selectRadius');
+const inputField = document.querySelector('#address');
+const inputDataList = document.querySelector('#inputsDataList');
+
 const alertModal = document.querySelector("#alertModal");
 const gMapWindow = document.querySelector("#map");
 const gMapBaseDiv = document.querySelector(`div[style="z-index: 3; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px; touch-action: pan-x pan-y;"]`);
@@ -156,7 +157,7 @@ function initMap(issLat, issLon, altitude) {
         displayInputOptions();
         event.preventDefault();
         // Removes ISS marker
-        marker.setMap(null);
+        issMarker.setMap(null);
         // Passes in Google Maps object
         geocodeAddress(geocoder, map);
     });
@@ -198,7 +199,7 @@ function initMap(issLat, issLon, altitude) {
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = results[0].formatted_address;
 
-                getSattelitesNearMe(userLat, userLon, 0, radiusList.val(), satteliteList.val());
+                getSattelitesNearMe(userLat, userLon, 0, radiusList.options[radiusList.options.selectedIndex].getAttribute('value'), satteliteList.options[radiusList.options.selectedIndex].getAttribute('value'));
             } else {
                 addressInput.value = "";
 
@@ -386,7 +387,9 @@ function displaySatteliteList(){
     let keys = Object.keys(satteliteCategories);
 
     keys.forEach(function(each){
-        let option = $(`<option value="${each}">${each}</option>`);
+        let option = document.createElement('option');
+        option.setAttribute('value', `${each}`);
+        option.textContent = `${each}`;
         satteliteList.append(option);
     })
 }
@@ -399,7 +402,10 @@ function displayRadius(){
 
     radius.forEach(function(each){
         let displayRadius = each + String.fromCharCode(176);
-        let option = $(`<option value="${each}">${displayRadius}</option>`);
+        let option = document.createElement('option');
+        option.setAttribute('value', `${each}`);
+        option.textContent = `${displayRadius}`;
+
         radiusList.append(option);
     })
 }
@@ -410,14 +416,25 @@ function displayRadius(){
 function displayInputOptions(){
     let keys = Object.keys(localStorage);
 
-    inputDataList.children().remove();
+    removeAllChildNodes(inputDataList);
 
     keys.forEach(function(eachKey){
         if(eachKey.startsWith('cityName-')){
-            let option = $(`<option value=${localStorage.getItem(eachKey).substring(localStorage.getItem(eachKey).indexOf('-')+1)}>`);
-            inputDataList.append(option);
+            let option = document.createElement('option');
+            option.setAttribute('value', `${localStorage.getItem(eachKey).substring(localStorage.getItem(eachKey).indexOf('-')+1)}`)
+            inputDataList.appendChild(option);
         }
     })
+}
+
+/**
+ * Function removes child nodes of the given parent node
+ * @param {*} parentElement 
+ */
+ function removeAllChildNodes(parentElement){
+    while(parentElement.firstChild){
+        parentElement.removeChild(parentElement.firstChild);
+    }
 }
 
 
