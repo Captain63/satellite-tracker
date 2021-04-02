@@ -5,6 +5,7 @@ const inputField = document.querySelector('#address');
 const inputDataList = document.querySelector('#inputsDataList');
 const alertModal = document.querySelector("#alertModal");
 const gMapWindow = document.querySelector("#map");
+const toggleBtn = document.querySelector('#toggleBtn');
 
 
 //This object will be displayed on UI as a Select option for users to choose
@@ -149,6 +150,25 @@ function initMap(issLat, issLon, altitude) {
     // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
     
+    /**
+     * Function checks width of the window based on the size will hide/show button or form
+     */
+    window.addEventListener('resize', function(){
+        if(window.innerWidth <= 376){
+            toggleBtn.style.display = 'block';
+        }else{
+            toggleBtn.style.display = 'none';
+        }
+    })
+
+    /**
+     * Function will change views between "Search" button and "Form"
+     */
+   toggleBtn.addEventListener('click', function(){
+       toggleBtn.style.display = 'none';
+        document.querySelector('main').style.display = 'block';
+   })
+
     document.querySelector("#submit").addEventListener("click", (event) => {
         //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
         localStorage.setItem(`cityName-${inputField.value}`, inputField.value);
@@ -158,7 +178,14 @@ function initMap(issLat, issLon, altitude) {
         issMarker.setMap(null);
         // Passes in Google Maps object
         geocodeAddress(geocoder, map);
+
+        //Will toggle between visibility of Search button and Form when screen size is small
+        if(window.screen.width < 376){
+            document.querySelector('main').style.display = 'none';
+            toggleBtn.style.display = 'block';
+        }
     });
+
 
     function geocodeAddress(geocoder, resultsMap) {
         // Input field for address
