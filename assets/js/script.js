@@ -3,10 +3,9 @@ const satteliteList = document.querySelector('#satteliteList');
 const radiusList = document.querySelector('#selectRadius');
 const inputField = document.querySelector('#address');
 const inputDataList = document.querySelector('#inputsDataList');
-
 const alertModal = document.querySelector("#alertModal");
 const gMapWindow = document.querySelector("#map");
-const gMapBaseDiv = document.querySelector(`div[style="z-index: 3; position: absolute; height: 100%; width: 100%; padding: 0px; border-width: 0px; margin: 0px; left: 0px; top: 0px; touch-action: pan-x pan-y;"]`);
+
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -70,8 +69,6 @@ displayInputOptions();
 displaySatteliteList();
 displayRadius();
 getISSPostion();
-
-//Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
 // Google Maps API calls
 // Global map variable for assigning different icons/locations to map
@@ -151,9 +148,10 @@ function initMap(issLat, issLon, altitude) {
 
     // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
+    
     document.querySelector("#submit").addEventListener("click", (event) => {
         //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
-        localStorage.setItem(`cityName-${inputField.val()}`, inputField.val());
+        localStorage.setItem(`cityName-${inputField.value}`, inputField.value);
         displayInputOptions();
         event.preventDefault();
         // Removes ISS marker
@@ -189,8 +187,6 @@ function initMap(issLat, issLon, altitude) {
                 // Adds marker to markerArray for later removal
                 markerArray.push(marker);
 
-                //console.log(results[0]);
-
                 // Overwrite default userLat and userLon based on new user input
                 userLat = results[0].geometry.location.lat();
                 userLon =  results[0].geometry.location.lng();
@@ -199,7 +195,7 @@ function initMap(issLat, issLon, altitude) {
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = results[0].formatted_address;
 
-                getSattelitesNearMe(userLat, userLon, 0, radiusList.options[radiusList.options.selectedIndex].getAttribute('value'), satteliteList.options[radiusList.options.selectedIndex].getAttribute('value'));
+                getSattelitesNearMe(userLat, userLon, 0, radiusList.options[radiusList.options.selectedIndex].getAttribute('value'), satteliteList.options[satteliteList.options.selectedIndex].getAttribute('value'));
             } else {
                 addressInput.value = "";
 
@@ -351,7 +347,9 @@ function getISSPostion() {
  */
  function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
     let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
-    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${categoryID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
+    let satelliteID = Number(categoryID);
+    
+    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${satelliteID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
 
     fetch(endPoint)
         .then(function (response) {
@@ -369,7 +367,6 @@ function getISSPostion() {
                     clearSatellites();
                     addCircle(lat, lng, searchRadius);
                 } else {
-                    //console.log(data);
                     addSatellite(data);
                     addCircle(lat, lng, searchRadius);
                 }
@@ -385,10 +382,12 @@ function getISSPostion() {
  */
 function displaySatteliteList(){
     let keys = Object.keys(satteliteCategories);
+    let map = new Map(Object.entries(satteliteCategories));
 
     keys.forEach(function(each){
+        
         let option = document.createElement('option');
-        option.setAttribute('value', `${each}`);
+        option.setAttribute('value', `${map.get(each)}`);
         option.textContent = `${each}`;
         satteliteList.append(option);
     })
