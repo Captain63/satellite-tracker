@@ -295,7 +295,7 @@ function addSatellite(satObject, satId) {
     }
     
     // Displays special icon if ISS category (2) is selected by user
-    if (satId = 2) {
+    if (satId === 2) {
         satIcons(satObject, issSVG);
     } else {
         satIcons(satObject, satSVG);
