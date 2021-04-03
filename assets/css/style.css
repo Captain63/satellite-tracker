@@ -116,7 +116,8 @@ img:focus {
         display: block;
         margin: auto;
         margin-bottom: 5px;
-        width: 300px;
+        max-width: 300px;
+        width: 100%;
     }
 }
 
@@ -130,7 +131,7 @@ img:focus {
         margin-top: 30px;
     }
 
-    select, input{
+    select, input, button {
         width: 80%;
     }
 

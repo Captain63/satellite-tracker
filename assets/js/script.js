@@ -393,8 +393,7 @@ function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
     let satelliteID = Number(categoryID);
 
     let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${satelliteID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
-
-    console.log(endPoint);
+    
     fetch(endPoint)
         .then(function (response) {
             if (!response.ok) {
