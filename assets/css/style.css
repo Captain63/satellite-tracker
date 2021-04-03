@@ -92,7 +92,7 @@ img:focus {
     width: 200px;
     height: 50px;
     z-index: 4;
-    bottom: 15%;
+    bottom: 20%;
     left: 25%;
     position: absolute;
     display: none;
@@ -105,11 +105,11 @@ img:focus {
 }
 
 /* Larger than tablet */
-@media (max-width: 800px) {
+@media only screen and (max-width: 800px) {
     h1 {
-        width: 100%;
+        width: fit-content;
         margin: auto;
-         
+        font-size: 3.5rem;
     }
 
     input, select, button {
@@ -120,7 +120,7 @@ img:focus {
     }
 }
 
-@media (max-width: 375px){
+@media only screen and (max-width: 375px){
     main {
         margin-top: 100px;
         display: none;
@@ -138,4 +138,10 @@ img:focus {
         display: inline;
     }
 
+}
+
+@media only screen and (max-width: 335px) {
+    #toggleBtn {
+        left: 20%;
+    }
 }

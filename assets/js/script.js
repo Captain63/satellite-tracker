@@ -230,6 +230,11 @@ function initMap(issLat, issLon, altitude) {
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = 'Address not recognized';
                 displayAlertModal("Address not recognized. Please check search term.");
+                if (markerArray.length > 0) {
+                    markerArray[0].setMap(null);
+                    markerArray.shift();
+                }
+                clearSatellites();
                 clearCircle();
             }
         });
@@ -446,7 +451,7 @@ function displayRadius() {
         // Displays string for list
         option.textContent = `${each} miles`;
         // Assigns value converted from miles into km and then meters
-        option.setAttribute("value", (each * 1.609 * 1000));
+        option.setAttribute("value", (each/62.1371));
         radiusList.appendChild(option);
     })
 }
