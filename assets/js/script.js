@@ -1,10 +1,12 @@
 // DOM declarations
-const satteliteList = $('#satteliteList');
-const radiusList = $('#selectRadius');
-const inputField = $('#address');
-const inputDataList = $('#inputsDataList');
+
+const satteliteList = document.querySelector('#satteliteList');
+const radiusList = document.querySelector('#selectRadius');
+const inputField = document.querySelector('#address');
+const inputDataList = document.querySelector('#inputsDataList');
 const alertModal = document.querySelector("#alertModal");
 const gMapWindow = document.querySelector("#map");
+const toggleBtn = document.querySelector('#toggleBtn');
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -68,8 +70,6 @@ displayInputOptions();
 displaySatteliteList();
 displayRadius();
 getISSPostion();
-
-//Object.keys(satteliteCategories).forEach( a=> console.log(a))
 
 // Google Maps API calls
 // Global map variable for assigning different icons/locations to map
@@ -150,15 +150,46 @@ function initMap(issLat, issLon, altitude) {
 
     // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
+
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 10b83d8d1ef23908f0623359154da366bf7c7e43
+    /**
+     * Function checks width of the window based on the size will hide/show button or form
+     */
+    window.addEventListener('resize', function () {
+        if (window.innerWidth <= 376) {
+            toggleBtn.style.display = 'block';
+        } else {
+            toggleBtn.style.display = 'none';
+        }
+    })
+
+    /**
+     * Function will change views between "Search" button and "Form"
+     */
+    toggleBtn.addEventListener('click', function () {
+        toggleBtn.style.display = 'none';
+        document.querySelector('main').style.display = 'block';
+    })
+
     document.querySelector("#submit").addEventListener("click", (event) => {
         //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
-        localStorage.setItem(`cityName-${inputField.val()}`, inputField.val());
+        localStorage.setItem(`cityName-${inputField.value}`, inputField.value);
         displayInputOptions();
         event.preventDefault();
         // Removes ISS marker
         issMarker.setMap(null);
         // Passes in Google Maps object
         geocodeAddress(geocoder, map);
+
+
+        //Will toggle between visibility of Search button and Form when screen size is small
+        if (window.screen.width < 376) {
+            document.querySelector('main').style.display = 'none';
+            toggleBtn.style.display = 'block';
+        }
     });
 
     function geocodeAddress(geocoder, resultsMap) {
@@ -167,9 +198,9 @@ function initMap(issLat, issLon, altitude) {
 
         // Actual string entered into input field for address
         const address = addressInput.value;
-    
+
         geocoder.geocode({ address: address }, (results, status) => {
-            
+
             // Confirms status
             if (status === "OK") {
                 // Removes previous marker created by geocoder
@@ -190,13 +221,13 @@ function initMap(issLat, issLon, altitude) {
 
                 // Overwrite default userLat and userLon based on new user input
                 userLat = results[0].geometry.location.lat();
-                userLon =  results[0].geometry.location.lng();
+                userLon = results[0].geometry.location.lng();
                 addressInput.value = "";
 
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = results[0].formatted_address;
 
-                getSattelitesNearMe(userLat, userLon, 0, radiusList.val(), satteliteList.val());
+                getSattelitesNearMe(userLat, userLon, 0, radiusList.options[radiusList.options.selectedIndex].getAttribute('value'), satteliteList.options[satteliteList.options.selectedIndex].getAttribute('value'));
             } else {
                 addressInput.value = "";
 
@@ -218,8 +249,6 @@ let openInfoWindows = [];
 function addSatellite(satObject, satId) {
     // Clears any existing satellites from previous searches before populating new ones
     clearSatellites();
-
-    console.log(satId);
 
     const satSVG = {
         path: "M5.05,17.51l2.08,2.08a.41.41,0,0,0,.56,0,3.72,3.72,0,0,0,.9-3.81l.63-.63,1,1a.44.44,0,0,0,.28.12.4.4,0,0,0,.28-.12l2.56-2.55,1,1-1.25,1.25a.4.4,0,0,0,0,.56l5.16,5.16a.39.39,0,0,0,.28.12.4.4,0,0,0,.29-.12l3.06-3.06a.4.4,0,0,0,0-.57l-5.16-5.16a.4.4,0,0,0-.56,0L14.91,14l-1-1,1.92-1.93a2.2,2.2,0,0,0,.26-2.81l.9-.9a.43.43,0,0,0,.11-.28A.39.39,0,0,0,17,6.84L15.16,5a.4.4,0,0,0-.56,0l-.9.9a2.2,2.2,0,0,0-2.81.26L9,8.1l-1-1L9.21,5.84a.4.4,0,0,0,.12-.28.42.42,0,0,0-.12-.28L4.05.12A.39.39,0,0,0,3.77,0a.4.4,0,0,0-.29.12L.42,3.18a.4.4,0,0,0-.12.29.39.39,0,0,0,.12.28L5.58,8.91a.39.39,0,0,0,.56,0L7.39,7.66l1,1L5.85,11.22a.39.39,0,0,0,0,.56l1,1-.63.63a3.72,3.72,0,0,0-3.81.9.43.43,0,0,0-.11.28.39.39,0,0,0,.11.28L4.49,17l-.14.14a.4.4,0,0,0,0,.56.39.39,0,0,0,.56,0ZM3,5.18l2.5-2.5L6.65,3.84,4.14,6.35ZM4.92,2.12l-2.5,2.5L1.26,3.47,3.77,1ZM8.37,5.56,5.86,8.07,4.7,6.91,7.21,4.4Zm11,11L16.82,19l-1.17-1.16,2.51-2.51Zm-1.94,3.06,2.5-2.5L21,18.23l-2.51,2.51Zm-3.45-3.44,2.51-2.51,1.16,1.16L15.09,17.3Zm1-5.26-3.37,3.37L7.75,10.44l3.37-3.37ZM13.45,6.74l1.81,1.81a1.4,1.4,0,0,1,.42,1,1.37,1.37,0,0,1-.22.74L11.71,6.54a1.38,1.38,0,0,1,.74-.21A1.4,1.4,0,0,1,13.45,6.74Zm2.69.38-.6.59-.62-.63-.63-.62.59-.6ZM6.69,11.5l.5-.5L11,14.81l-.5.5ZM8.24,15a4,4,0,0,0-.55-.7,4,4,0,0,0-.7-.55l.42-.42,1.25,1.25Zm-5-.4a2.94,2.94,0,0,1,4.12,4.12Z",
@@ -258,7 +287,7 @@ function addSatellite(satObject, satId) {
             // Adds listener to open when satellite icon is clicked
             satMarker.addListener("click", () => {
                 infowindow.open(map, satMarker);
-                openInfoWindows.push(infowindow);       
+                openInfoWindows.push(infowindow);
             })
 
             // Pushes satMarker variables to array for later removal on next search
@@ -266,7 +295,7 @@ function addSatellite(satObject, satId) {
             infoWindowArray.push(infowindow);
         })
     }
-    
+
     // Displays special icon if ISS category (2) is selected by user
     if (satId === 2) {
         satIcons(satObject, issSVG);
@@ -276,8 +305,8 @@ function addSatellite(satObject, satId) {
 }
 
 function clearSatellites() {
-     // Clears any existing satellite icons so that search is always showing latest results for area (and they don't linger on other parts of the map)
-     if (satMarkerArray.length > 0) {
+    // Clears any existing satellite icons so that search is always showing latest results for area (and they don't linger on other parts of the map)
+    if (satMarkerArray.length > 0) {
         for (let i = 0; i < satMarkerArray.length; i++) {
             satMarkerArray[i].setMap(null);
         }
@@ -331,7 +360,7 @@ function getISSPostion() {
                 displayAlertModal("Something went wrong with the server! Please try reloading the page.");
                 throw Error(response.statusText);
             }
-            response.json().then(function (data){
+            response.json().then(function (data) {
                 // Assigns ISS lat, lon and altitude to variables
                 const issLat = data.positions[0].satlatitude;
                 const issLng = data.positions[0].satlongitude;
@@ -339,7 +368,7 @@ function getISSPostion() {
 
                 // Passes variables to initMap function
                 initMap(issLat, issLng, altitude);
-                
+
                 // Creates example search radius circle with ISS at center
                 addCircle(issLat, issLng, 10);
             })
@@ -360,7 +389,9 @@ function getISSPostion() {
  */
 function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
     let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
-    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${categoryID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
+    let satelliteID = Number(categoryID);
+
+    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${satelliteID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
 
     console.log(endPoint);
     fetch(endPoint)
@@ -370,19 +401,19 @@ function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
                 throw Error(response.statusText);
             }
             response.json()
-            .then(function (data) {
-                // No results found for satellites above search area
-                if (data === null) {
-                    displayAlertModal("No satellites found within search radius. Please search again.");
+                .then(function (data) {
+                    // No results found for satellites above search area
+                    if (data === null) {
+                        displayAlertModal("No satellites found within search radius. Please search again.");
 
-                    // Clears any existing satellites from previous searches
-                    clearSatellites();
-                    addCircle(lat, lng, searchRadius);
-                } else {
-                    addSatellite(data, categoryID);
-                    addCircle(lat, lng, searchRadius);
-                }
-            })
+                        // Clears any existing satellites from previous searches
+                        clearSatellites();
+                        addCircle(lat, lng, searchRadius);
+                    } else {
+                        addSatellite(data, categoryID);
+                        addCircle(lat, lng, searchRadius);
+                    }
+                })
         })
         .catch(function (error) {
             console.log('Exception caught with an error: \n', error);
@@ -392,11 +423,15 @@ function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
 /**
  * Function will use object satteliteCategories and add each key to Select element on UI.
  */
-function displaySatteliteList(){
+function displaySatteliteList() {
     let keys = Object.keys(satteliteCategories);
+    let map = new Map(Object.entries(satteliteCategories));
 
-    keys.forEach(function(each){
-        let option = $(`<option value="${each}">${each}</option>`);
+    keys.forEach(function (each) {
+
+        let option = document.createElement('option');
+        option.setAttribute('value', `${map.get(each)}`);
+        option.textContent = `${each}`;
         satteliteList.append(option);
     })
 }
@@ -404,18 +439,18 @@ function displaySatteliteList(){
 /**
  * Function will display radius options on UI for user to select.
  */
-function displayRadius(){
+function displayRadius() {
     // 1 zenith degree = roughly 100,000 meters
     // 100,000 meters = 10 km
     // 10 km = 62.1371 miles
     let radiusOptions = [10, 25, 50, 75, 100, 250, 500, 750, 1000, 2500, 5000];
 
-    radiusOptions.forEach(function(each){
+    radiusOptions.forEach(function (each) {
         let option = document.createElement("option");
         // Displays string for list
         option.textContent = `${each} miles`;
         // Assigns value converted from miles into km and then meters
-        option.setAttribute("value", (each *1.609 * 1000));
+        option.setAttribute("value", (each * 1.609 * 1000));
         radiusList.appendChild(option);
     })
 }
@@ -423,18 +458,30 @@ function displayRadius(){
 /**
  * Function will retreive previously entered city names from localStorage and display as an option to select.
  */
-function displayInputOptions(){
+function displayInputOptions() {
     let keys = Object.keys(localStorage);
 
-    inputDataList.children().remove();
+    removeAllChildNodes(inputDataList);
 
-    keys.forEach(function(eachKey){
-        if(eachKey.startsWith('cityName-')){
-            let option = $(`<option value=${localStorage.getItem(eachKey).substring(localStorage.getItem(eachKey).indexOf('-')+1)}>`);
-            inputDataList.append(option);
+    keys.forEach(function (eachKey) {
+        if (eachKey.startsWith('cityName-')) {
+            let option = document.createElement('option');
+            option.setAttribute('value', `${localStorage.getItem(eachKey).substring(localStorage.getItem(eachKey).indexOf('-') + 1)}`)
+            inputDataList.appendChild(option);
         }
     })
 }
+
+/**
+ * Function removes child nodes of the given parent node
+ * @param {*} parentElement 
+ */
+function removeAllChildNodes(parentElement) {
+    while (parentElement.firstChild) {
+        parentElement.removeChild(parentElement.firstChild);
+    }
+}
+
 
 
 // Modal Functions + Event Listeners
@@ -446,17 +493,17 @@ function displayAlertModal(errorText) {
 // Allows user to close modal by clicking X
 document.querySelector(".close").addEventListener("click", () => {
     alertModal.classList.add("hidden");
-}) 
+})
 
 // Allows user to close modal by clicking outside
-window.addEventListener("click", function(event) {
+window.addEventListener("click", function (event) {
     if (event.target === alertModal) {
         alertModal.classList.add("hidden");
     }
 })
 
 // Adds event listener so only one satellite icon displays at a time
-gMapWindow.addEventListener("click", function(event) {
+gMapWindow.addEventListener("click", function (event) {
     let infoClickCount = 0;
 
     // Checks that any infowindows are currently open before proceeding
