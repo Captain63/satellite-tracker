@@ -112,10 +112,11 @@ img:focus {
          
     }
 
-    input, select {
+    input, select, button {
         display: block;
         margin: auto;
         margin-bottom: 5px;
+        width: 300px;
     }
 }
 
