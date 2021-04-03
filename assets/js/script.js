@@ -151,10 +151,6 @@ function initMap(issLat, issLon, altitude) {
     // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
 
-<<<<<<< HEAD
-=======
-    
->>>>>>> 10b83d8d1ef23908f0623359154da366bf7c7e43
     /**
      * Function checks width of the window based on the size will hide/show button or form
      */
