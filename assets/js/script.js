@@ -151,10 +151,7 @@ function initMap(issLat, issLon, altitude) {
     // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
 
-<<<<<<< HEAD
-=======
     
->>>>>>> 10b83d8d1ef23908f0623359154da366bf7c7e43
     /**
      * Function checks width of the window based on the size will hide/show button or form
      */
@@ -234,6 +231,11 @@ function initMap(issLat, issLon, altitude) {
                 // Users placeholder attribute so user doesn't have to erase text from input field to search again
                 addressInput.placeholder = 'Address not recognized';
                 displayAlertModal("Address not recognized. Please check search term.");
+                if (markerArray.length > 0) {
+                    markerArray[0].setMap(null);
+                    markerArray.shift();
+                }
+                clearSatellites();
                 clearCircle();
             }
         });
@@ -393,7 +395,6 @@ function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
 
     let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${satelliteID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
 
-    console.log(endPoint);
     fetch(endPoint)
         .then(function (response) {
             if (!response.ok) {
@@ -450,7 +451,7 @@ function displayRadius() {
         // Displays string for list
         option.textContent = `${each} miles`;
         // Assigns value converted from miles into km and then meters
-        option.setAttribute("value", (each * 1.609 * 1000));
+        option.setAttribute("value", (each/62.1371));
         radiusList.appendChild(option);
     })
 }
@@ -481,8 +482,6 @@ function removeAllChildNodes(parentElement) {
         parentElement.removeChild(parentElement.firstChild);
     }
 }
-
-
 
 // Modal Functions + Event Listeners
 function displayAlertModal(errorText) {
