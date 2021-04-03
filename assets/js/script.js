@@ -1,4 +1,5 @@
 // DOM declarations
+
 const satteliteList = document.querySelector('#satteliteList');
 const radiusList = document.querySelector('#selectRadius');
 const inputField = document.querySelector('#address');
@@ -6,7 +7,6 @@ const inputDataList = document.querySelector('#inputsDataList');
 const alertModal = document.querySelector("#alertModal");
 const gMapWindow = document.querySelector("#map");
 const toggleBtn = document.querySelector('#toggleBtn');
-
 
 //This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
@@ -151,6 +151,10 @@ function initMap(issLat, issLon, altitude) {
     // Sets variable to call geocoder under submit event listener
     const geocoder = new google.maps.Geocoder();
 
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 10b83d8d1ef23908f0623359154da366bf7c7e43
     /**
      * Function checks width of the window based on the size will hide/show button or form
      */
@@ -180,13 +184,13 @@ function initMap(issLat, issLon, altitude) {
         // Passes in Google Maps object
         geocodeAddress(geocoder, map);
 
+
         //Will toggle between visibility of Search button and Form when screen size is small
         if (window.screen.width < 376) {
             document.querySelector('main').style.display = 'none';
             toggleBtn.style.display = 'block';
         }
     });
-
 
     function geocodeAddress(geocoder, resultsMap) {
         // Input field for address
@@ -477,6 +481,7 @@ function removeAllChildNodes(parentElement) {
         parentElement.removeChild(parentElement.firstChild);
     }
 }
+
 
 
 // Modal Functions + Event Listeners
