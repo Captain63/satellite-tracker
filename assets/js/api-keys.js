@@ -1,5 +1,9 @@
-const googleMapsAPI = `[YOUR KEY HERE]`;
-const n2yoAPI = `[YOUR KEY HERE]`;
+// API key declarations
+const googleMapsAPI = `[YOUR API KEY HERE]`;
+const n2yoAPI = `[YOUR API KEY HERE]`;
 
-// Sets Google Maps API key for script link
-document.querySelector("#maps-link").setAttribute("src", `https://maps.googleapis.com/maps/api/js?key=${googleMapsAPI}&libraries=&v=weekly`);
+// Appends Google Maps API script link to index.html head
+const googleScript = document.createElement("script");
+googleScript.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsAPI}&libraries=&v=weekly`;
+googleScript.async = true;
+document.head.appendChild(googleScript);
