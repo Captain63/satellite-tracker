@@ -353,7 +353,7 @@ function clearCircle() {
 function getISSPostion() {
     let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
     // Pulls position of ISS for next second based on page load time
-    let endPoint = `${baseURL}positions/25544/-28/5/0/1/&apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
+    let endPoint = `${baseURL}positions/25544/-28/5/0/1/&apiKey=${n2yoAPI}`;
 
     fetch(endPoint)
         .then(function (response) {
@@ -392,8 +392,8 @@ function getSattelitesNearMe(lat, lng, alt = 0, searchRadius, categoryID) {
     let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
     let satelliteID = Number(categoryID);
 
-    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${satelliteID}?apiKey=V9D6C3-2PPF46-6G6N28-4NZ0`;
-    
+    let endPoint = `${baseURL}/above/${lat}/${lng}/${alt}/${searchRadius}/${satelliteID}?apiKey=${n2yoAPI}`;
+
     fetch(endPoint)
         .then(function (response) {
             if (!response.ok) {

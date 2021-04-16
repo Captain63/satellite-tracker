@@ -18,10 +18,13 @@
 
     <!-- Local CSS file link -->
     <link rel="stylesheet" href="./assets/css/style.css">
+
+    <!-- API Key script file link - added to append Google Maps script link to head -->
+    <script src="./assets/js/api-keys.js">
+    </script>
 </head>
 
 <body>
-    <div class="bg-image"></div>
     <div id="map"></div>
     <button class="button-primary" type="submit" id="toggleBtn" data-visibility="hidden">Search</button>
     <main>
@@ -39,8 +42,6 @@
             </select>
             <button class="button-primary" type="submit" id="submit">Submit</button>
         </form>
-        <!-- Empty div for display Google Map window -->
-        <!-- <div id="map"></div> -->
     </main>
 
     <div id="alertModal" class="hidden modal">
@@ -52,15 +53,13 @@
         </div>
     </div>
 
+    
 
     <!-- External links -->
-    <!-- Google Maps link -->
-    <script
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAwMzuKJ4JCYcKtI2nSSJzKPxvSneleYHM&libraries=&v=weekly">
-    </script>
-
     <!-- Moment.js link -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <!-- Local script file -->
     <script src="./assets/js/script.js"></script>
 </body>
 
