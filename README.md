@@ -1,6 +1,11 @@
 # Satellite Locator: What's Orbiting Above Me?
 
-## NOTE
+## NOTE 1: API Keys
+In order to test this application, API keys are required for both the Google Maps API and the N2YO API. Once created, add them to the api-keys.js file under assests/js to access the full functionality of the application. Guides for creating both keys are below:
+- https://developers.google.com/maps/documentation/javascript/get-api-key
+- https://www.n2yo.com/api/
+
+## NOTE 2: Cross Origin Resource Sharing
 In order to test this application, a plugin is required to enable Cross Origin Resource Sharing for API calls to N2YO. We recommend using the following browser extension in Chrome: https://mybrowseraddon.com/access-control-allow-origin.html
 
 ## Project Overview
@@ -24,9 +29,6 @@ From here, the user can then fill out the input form to search for different cat
 <li>HTML</li>
 <li>CSS</li>
 </ul>
-
-## Live Application:
-https://captain63.github.io/satellite-tracker/
 
 ## Application Screenshot
 ![Application showing military satellites within a 1,000 mile radius of Arlington, VA](./assets/images/completed-application-capture.PNG)
