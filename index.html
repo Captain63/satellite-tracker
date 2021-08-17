@@ -1,66 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>What's Orbiting Above Me?</title>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What's Orbiting Above Me?</title>
+        <!-- Favicon -->
+        <link rel="shortcut icon" type="image/png" href="./assets/images/satellite-favicon.png">
 
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/png" href="./assets/images/satellite-favicon.png">
+        <!-- Normalize CSS (alternate to Reset) file link -->
+        <link rel="stylesheet" href="./assets/css/normalize.css">
 
-    <!-- Normalize CSS (alternate to Reset) file link -->
-    <link rel="stylesheet" href="./assets/css/normalize.css">
+        <!-- Skeleton CSS file link -->
+        <link rel="stylesheet" href="./assets/css/skeleton.css">
 
-    <!-- Skeleton CSS file link -->
-    <link rel="stylesheet" href="./assets/css/skeleton.css">
+        <!-- Local CSS file link -->
+        <link rel="stylesheet" href="./assets/css/style.css">
+    </head>
 
-    <!-- Local CSS file link -->
-    <link rel="stylesheet" href="./assets/css/style.css">
+    <body>
+        <div id="map"></div>
+        <button class="button-primary" type="submit" id="toggleBtn" data-visibility="hidden">Search</button>
+        <main>
+            <header>
+                <h1>Satellite Locator</h1>
+            </header>
+            <form>
+                <input type="text" id="address" list="inputsDataList" placeholder="Input address, city or ZIP">
+                <datalist id="inputsDataList"></datalist>
+                <select class="form-select" id="satteliteList">
+                    <option selected>Select satellite category...</option>
+                </select>
+                <select class="form-select" id="selectRadius">
+                    <option selected>Select radius...</option>
+                </select>
+                <button class="button-primary" type="submit" id="submit">Submit</button>
+            </form>
+        </main>
 
-    <!-- API Key script file link - added to append Google Maps script link to head -->
-    <script src="./assets/js/api-keys.js">
-    </script>
-</head>
-
-<body>
-    <div id="map"></div>
-    <button class="button-primary" type="submit" id="toggleBtn" data-visibility="hidden">Search</button>
-    <main>
-        <header>
-            <h1>Satellite Locator</h1>
-        </header>
-        <form>
-            <input type="text" id="address" list="inputsDataList" placeholder="Input address, city or ZIP">
-            <datalist id="inputsDataList"></datalist>
-            <select class="form-select" id="satteliteList">
-                <option selected>Select satellite category...</option>
-            </select>
-            <select class="form-select" id="selectRadius">
-                <option selected>Select radius...</option>
-            </select>
-            <button class="button-primary" type="submit" id="submit">Submit</button>
-        </form>
-    </main>
-
-    <div id="alertModal" class="hidden modal">
-        <div class="modal-content">
-            <div class="alert-text"></div>
-            <div class="close">
-                &times;
+        <div id="alertModal" class="hidden modal">
+            <div class="modal-content">
+                <div class="alert-text"></div>
+                <div class="close">
+                    &times;
+                </div>
             </div>
         </div>
-    </div>
 
-    
+        <!-- Google Maps API -->
+        <script src="https://maps.googleapis.com/maps/api/js?key=[YOUR API KEY HERE]=&v=weekly"></script>
 
-    <!-- External links -->
-    <!-- Moment.js link -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-
-    <!-- Local script file -->
-    <script src="./assets/js/script.js"></script>
-</body>
-
+        <!-- Local script file -->
+        <script src="./assets/js/script.js" async></script>
+    </body>
 </html>
