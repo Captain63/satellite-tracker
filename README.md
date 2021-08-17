@@ -14,12 +14,11 @@ Satellite Locator is a client-side application that allows a user to search for 
 
 On initial page load, the user is shown the current position of the International Space Station (ISS) on the map to give a sense of the UI and to answer what may be a lot of users' initial questions (since the ISS is typically the most well-known "satellite"). This also ensures that the UI will always be displaying a satellite on page load as opposed to setting a random address that may or may not have satellites in range at that moment. 
 
-From here, the user can then fill out the input form to search for different categories of satellites within a specified area (in miles) of the address they provide. This functionality is achieved by using fetch methods to the N2YO API for current satellite data and linking the Google Maps JavaScript API in the HTML to then represent the parsed satellite data visually for the user. Additional flexibility in address inputs from the user (i.e. city, address, ZIP, state, country) is achieved by leveraging the Google Maps Geocoding method to then convert these values into latitude and longitude for accessing the N2YO API. The application is powered by JavaScript, HTML, and CSS. Primary CSS styling is pulled from the Skeleton.css library. The Moment.js library is accessed to reformat the launch dates provided by the N2YO API.
+From here, the user can then fill out the input form to search for different categories of satellites within a specified area (in miles) of the address they provide. This functionality is achieved by using fetch methods to the N2YO API for current satellite data and linking the Google Maps JavaScript API in the HTML to then represent the parsed satellite data visually for the user. Additional flexibility in address inputs from the user (i.e. city, address, ZIP, state, country) is achieved by leveraging the Google Maps Geocoding method to then convert these values into latitude and longitude for accessing the N2YO API. The application is powered by JavaScript, HTML, and CSS. Primary CSS styling is pulled from the Skeleton.css library.
 
 ### Libraries/APIs Used
 - [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/overview)
 - [N2YO API](https://www.n2yo.com/api/)
-- [Moment.js Library](https://momentjs.com/)
 - [Skeleton.css Library](http://getskeleton.com/)
 
 ### Languages Used
@@ -33,7 +32,7 @@ From here, the user can then fill out the input form to search for different cat
 
 ## Notes for Development
 ### NOTE 1: API Keys
-In order to test this application, API keys are required for both the Google Maps API and the N2YO API. Once created, add them to the api-keys.js file under assests/js to access the full functionality of the application. Guides for creating both keys are below:
+In order to test this application, API keys are required for both the Google Maps API and the N2YO API. Once created, add them to the API placeholders in index.html and script.js files to access the full functionality of the application. Guides for creating both keys are below:
 - https://developers.google.com/maps/documentation/javascript/get-api-key
 - https://www.n2yo.com/api/
 

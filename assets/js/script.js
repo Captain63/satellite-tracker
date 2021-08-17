@@ -1,5 +1,7 @@
-// DOM declarations
+// N2YO API Key
+const n2yoAPI = `[YOUR API KEY HERE]`;
 
+// DOM declarations
 const satteliteList = document.querySelector('#satteliteList');
 const radiusList = document.querySelector('#selectRadius');
 const inputField = document.querySelector('#address');
@@ -8,7 +10,7 @@ const alertModal = document.querySelector("#alertModal");
 const gMapWindow = document.querySelector("#map");
 const toggleBtn = document.querySelector('#toggleBtn');
 
-//This object will be displayed on UI as a Select option for users to choose
+// This object will be displayed on UI as a Select option for users to choose
 const satteliteCategories = {
     'Amateur radis': 18,
     'Beidou Navigation System': 35,
@@ -134,7 +136,8 @@ function initMap(issLat, issLon, altitude) {
         <h5 class="satname">International Space Station</h5>
         <ul class="satfacts">
             <li>Launch Date: 11-20-1998</li>
-            <li>Altitude: ${(Math.round(((altitude * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / ${(Math.round((((altitude * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
+            <li>Altitude: ${(Math.round(((altitude * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / 
+            ${(Math.round((((altitude * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
             <li>Latitude: ${issLat}</li>
             <li>Longitude: ${issLon}</li>
         </ul>`;
@@ -171,7 +174,7 @@ function initMap(issLat, issLon, altitude) {
     })
 
     document.querySelector("#submit").addEventListener("click", (event) => {
-        //storing in input value in localStorage. Ex: cityName-Fairfax: Fairfax
+        // Storing input value in localStorage. Ex: cityName-Fairfax: Fairfax
         localStorage.setItem(`cityName-${inputField.value}`, inputField.value);
         displayInputOptions();
         event.preventDefault();
@@ -181,7 +184,7 @@ function initMap(issLat, issLon, altitude) {
         geocodeAddress(geocoder, map);
 
 
-        //Will toggle between visibility of Search button and Form when screen size is small
+        // Will toggle between visibility of Search button and Form when screen size is small
         if (window.screen.width < 376) {
             document.querySelector('main').style.display = 'none';
             toggleBtn.style.display = 'block';
@@ -270,12 +273,25 @@ function addSatellite(satObject, satId) {
                 map: map
             })
 
+            const launchDate = new Date(sat.launchDate);
+
+            // Conversions
+            const launchYear = launchDate.getFullYear().toString();
+
+            let launchDay = (launchDate.getDate() + 1).toString();
+            launchDay = launchDay.length > 1 ? launchDay : `0${launchDay}`;
+
+            let launchMonth = (launchDate.getMonth() + 1).toString();
+            launchMonth = launchMonth.length > 1 ? launchMonth : `0${launchMonth}`;
+
+
             // Sets data to display in infowindow for each satellite
             const contentString = `
                 <h5 class="satname">Satellite: ${sat.satname}</h5>
                 <ul class="satfacts">
-                    <li>Launch Date: ${moment(sat.launchDate, "YYYY-MM-DD").format("MM-DD-YYYY")}</li>
-                    <li>Altitude: ${(Math.round(((sat.satalt * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / ${(Math.round((((sat.satalt * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
+                    <li>Launch Date: ${launchMonth}/${launchDay}/${launchYear}</li>
+                    <li>Altitude: ${(Math.round(((sat.satalt * 0.621371) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} miles / 
+                    ${(Math.round((((sat.satalt * 0.621371) * 5280) + Number.EPSILON) * 100) / 100).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')} feet</li>
                     <li>Latitude: ${sat.satlat}</li>
                     <li>Longitude: ${sat.satlng}</li>
                 </ul>`;
@@ -351,9 +367,9 @@ function clearCircle() {
 // N2YO API calls
 // Function displays position of ISS on map on page load
 function getISSPostion() {
-    let baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
+    const baseURL = 'https://api.n2yo.com/rest/v1/satellite/';
     // Pulls position of ISS for next second based on page load time
-    let endPoint = `${baseURL}positions/25544/-28/5/0/1/&apiKey=${n2yoAPI}`;
+    const endPoint = `${baseURL}positions/25544/-28/5/0/1/&apiKey=${n2yoAPI}`;
 
     fetch(endPoint)
         .then(function (response) {
@@ -481,8 +497,6 @@ function removeAllChildNodes(parentElement) {
         parentElement.removeChild(parentElement.firstChild);
     }
 }
-
-
 
 // Modal Functions + Event Listeners
 function displayAlertModal(errorText) {
